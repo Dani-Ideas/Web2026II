@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora</title>
+</head>
+<body>
+<div. >
+<h1>Calculadora</h1>
+</div>
+<div>
+<form id="calculadora-form">
+<input type="number" id="num1" placeholder="Numero 1" required>
+<br>
+<input type="number" id="num2" placeholder="Numero 2" required>
+<br>
+<select id="operador">
+<option value="sum">Sumar (+)</option>
+<option value="sub">Restar (-)</option>
+<option value="mul">Multiplicar (*)</option>
+<option value="div">Dividir (/)</option>
+</select>
+<button type="submit">Calcular</button>
+</form>
+<div. id="resultado" >
+
+</div>
+</div>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sumadora</title>
+</head>
+<body>
+<h1>Sumadora Basica</h1>
+<div>
+<form id="sumForm">
+<label for="num1">Numero 1</label>
+<input type="number" id="num1" placeholder="Numero 1" required>
+<label for="num2">Numero 2</label>
+<input type="number" id="num2" placeholder="Numero 2" required>
+<button type="submit">Sumar</button>
+
+</form>
+<div id="resultado">
+
+</div>
+</div>
+
+</body>
+<script src="app.js"></script>
+</html>
+---
+document.getElementById("sumForm").addEventListener("submit", function(event) {
+event.preventDefault(); // Evita que el formulario se envíe y recargue la página
+
+// Obtener los valores de los campos de entrada
+const num1 = parseFloat(document.getElementById("num1").value.trim());
+const num2 = parseFloat(document.getElementById("num2").value.trim());
+
+// Realizar la suma
+const sum = num1 + num2;
+
+// Mostrar el resultado
+document.getElementById("resultado").textContent = sum;
+});

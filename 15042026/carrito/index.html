@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de compras</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🛒 Carrito de compras</h1>
+
+        <ul id="carrito"></ul>
+
+        <form id="formulario">
+            <label>Nombre del producto</label>
+            <input type="text" id="nombre" required>
+
+            <label>Precio</label>
+            <input type="number" id="precio" step="0.01" required>
+
+            <label>Cantidad</label>
+            <input type="number" id="cantidad" min="1" value="1" required>
+
+            <button type="submit">Agregar</button>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

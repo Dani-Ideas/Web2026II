@@ -1,0 +1,3 @@
+notes
+hacer una app a traves del carrito de compras  pero conUI en HTML con eventos Dom
+context
