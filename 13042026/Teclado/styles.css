@@ -1,0 +1,43 @@
+body {
+    font-family: Arial;
+    background: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.contenedor {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    width: 900px;
+}
+
+#pantalla {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    padding: 5px;
+}
+
+.fila {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.tecla {
+    padding: 10px;
+    margin: 2px;
+    background: #ddd;
+    border: none;
+    cursor: pointer;
+    min-width: 40px;
+}
+
+.tecla:hover {
+    background: #bbb;
+}
+
+.grande { min-width: 80px; }
+.extra { min-width: 100px; }
