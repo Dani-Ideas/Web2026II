@@ -4,104 +4,145 @@
 <body class="layout">
   <%- include('../partials/sidebar', { currentPage: 'inspections' }) %>
   <main class="main">
-    <%- include('../partials/topbar') %>
-    <div class="content">
 
+    <div class="content insp-page">
       <form method="POST" action="/inspecciones" enctype="multipart/form-data" id="inspForm">
 
-        <!-- ── Header ────────────────────────────────────────────── -->
-        <div class="insp-header">
-          <div class="insp-header__left">
-            <span class="insp-header__sup">Inspección Operativa</span>
-            <h1 class="insp-header__title">Formulario de Inspección Diaria</h1>
+        <!-- ── Page header ─────────────────────────────────────── -->
+        <div class="insp-ph">
+          <div class="insp-ph__left">
+            <span class="insp-ph__sup">Inspección Operativa</span>
+            <h1 class="insp-ph__title">Formulario de Inspección Diaria</h1>
+            <p class="insp-ph__vehicle">
+              Vehículo: <span id="headerVehicle" class="insp-ph__vehicle-name">—</span>
+            </p>
           </div>
-          <div class="insp-header__fields">
-            <div class="form__group">
-              <label class="form__label">Vehículo</label>
-              <select name="vehicle_id" id="vehicleSelect" class="input input--select" required onchange="onVehicleChange(this)">
-                <option value="">Seleccionar...</option>
-                <% vehicles.forEach(v => { %>
-                  <option value="<%= v.id %>" data-type="<%= v.type %>">
-                    <%= v.plate %> — <%= v.brand %> <%= v.model %>
-                  </option>
-                <% }) %>
-              </select>
-            </div>
-            <div class="form__group">
-              <label class="form__label">Conductor</label>
-              <input type="text" name="driver_name" class="input" required placeholder="Nombre completo" />
-            </div>
-            <div class="insp-date">
-              <span class="form__label">Fecha y Hora</span>
-              <span class="insp-date__value" id="liveDate"></span>
-            </div>
+          <div class="insp-ph__right">
+            <span class="insp-ph__date-label">FECHA Y HORA</span>
+            <span class="insp-ph__date-val" id="liveDate"></span>
           </div>
         </div>
 
-        <!-- ── Two-column body ───────────────────────────────────── -->
-        <div class="insp-body">
+        <!-- ── Driver + vehicle selectors ─────────────────────── -->
+        <div class="insp-selectors">
+          <div class="form__group">
+            <label class="form__label">Vehículo</label>
+            <select name="vehicle_id" id="vehicleSelect" class="input input--select" required
+                    onchange="onVehicleChange(this)">
+              <option value="">Seleccionar vehículo…</option>
+              <% vehicles.forEach(v => { %>
+                <option value="<%= v.id %>" data-type="<%= v.type %>"
+                        data-label="<%= v.brand %> <%= v.model %> [<%= v.plate %>]">
+                  <%= v.plate %> — <%= v.brand %> <%= v.model %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form__group">
+            <label class="form__label">Conductor</label>
+            <input type="text" name="driver_name" class="input" required
+                   placeholder="Nombre completo del conductor" />
+          </div>
+        </div>
 
-          <!-- LEFT: Carousel ──────────────────────────────────── -->
+        <!-- ── Route selector ─────────────────────────────────── -->
+        <div class="db-route-pick">
+          <div class="db-route-pick__head">
+            <label class="form__label">Ruta Asignada</label>
+            <span class="db-route-pick__demo">
+              &#8505; Demo — no se pueden agregar rutas adicionales
+            </span>
+          </div>
+          <div class="db-route-pick__options">
+            <% [
+              { val:'A', name:'Ruta A', desc:'Terminal Norte → Destino A', color:'var(--orange)' },
+              { val:'B', name:'Ruta B', desc:'Terminal Sur → Destino B',   color:'#8192a7' },
+              { val:'C', name:'Ruta C', desc:'Terminal Este → Destino C',  color:'var(--pass-text)' },
+            ].forEach(r => { %>
+              <label class="db-route-opt">
+                <input type="radio" name="route" value="<%= r.val %>" class="db-route-opt__radio" required />
+                <div class="db-route-opt__card">
+                  <span class="db-route-opt__badge" style="background:<%= r.color %>"><%= r.val %></span>
+                  <div>
+                    <p class="db-route-opt__name"><%= r.name %></p>
+                    <p class="db-route-opt__desc"><%= r.desc %></p>
+                  </div>
+                </div>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- ── 12-col main grid ────────────────────────────────── -->
+        <div class="insp-grid">
+
+          <!-- LEFT 8/12 — Category carousel ──────────────────── -->
           <div class="insp-left">
 
-            <!-- Dot indicators -->
-            <div class="car-dots" id="carDots">
-              <button type="button" class="car-dot car-dot--active" onclick="goToSlide(0)"></button>
-              <button type="button" class="car-dot" onclick="goToSlide(1)"></button>
-              <button type="button" class="car-dot" onclick="goToSlide(2)"></button>
-              <button type="button" class="car-dot" onclick="goToSlide(3)"></button>
+            <!-- Dot progress -->
+            <div class="car-dots">
+              <% ['Motor y Mecánica','Iluminación','Neumáticos','Seguridad'].forEach((lbl,i) => { %>
+                <button type="button"
+                  class="car-dot <%= i===0 ? 'car-dot--active' : '' %>"
+                  onclick="goToSlide(<%= i %>)"
+                  title="<%= lbl %>"></button>
+              <% }) %>
             </div>
 
-            <!-- Carousel track -->
+            <!-- Carousel -->
             <div class="car-wrap">
               <div class="car-track" id="carTrack">
 
-                <!-- ── Slide 1: Motor ───────────────────────────── -->
+                <!-- Slide 1 — Motor ───────────────────────────── -->
                 <div class="car-slide">
-                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#041627 0%,#1a3a5c 100%)">
-                    <span class="car-slide__hero-icon">⚙</span>
+                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#041627,#1a3a5c)">
+                    <span class="car-slide__icon">&#9881;</span>
                     <div>
-                      <div class="car-slide__hero-label">Categoría 1 / 4</div>
-                      <div class="car-slide__hero-title">Motor y Mecánica</div>
+                      <div class="car-slide__cat">Categoría 1 / 4</div>
+                      <div class="car-slide__name">Motor y Mecánica</div>
                     </div>
                   </div>
                   <div class="car-slide__body">
                     <% [
                       'Nivel de Aceite (Varilla/Sensor)',
                       'Líquido Refrigerante / Anticongelante',
-                      'Estado de Correas y Tensores'
-                    ].forEach((item, i) => { %>
+                      'Estado de Correas y Tensores',
+                      'Fugas visibles de fluidos'
+                    ].forEach(item => { %>
                       <label class="chk-row">
-                        <input type="checkbox" name="engine_items[]" value="<%= item %>" class="chk-box" />
                         <span class="chk-label"><%= item %></span>
+                        <input type="checkbox" name="engine_items[]" value="<%= item %>" class="chk-box" />
                       </label>
                     <% }) %>
                   </div>
                   <div class="car-slide__footer">
-                    <div class="star-group" data-field="engine_rating">
-                      <span class="star-group__label">Calificación general</span>
+                    <div class="star-row">
+                      <span class="star-row__label">Calificación general</span>
                       <div class="stars" id="starsEngine">
-                        <% for(let s=1;s<=5;s++) { %><span class="star" data-val="<%= s %>" onclick="rateStar('engine_rating',<%= s %>)">★</span><% } %>
+                        <% for(let s=1;s<=5;s++) { %>
+                          <span class="star" data-val="<%= s %>"
+                                onclick="rateStar('engine_rating',<%= s %>)">&#9733;</span>
+                        <% } %>
                       </div>
                       <input type="hidden" name="engine_rating" id="engine_rating" value="" />
                     </div>
                     <div class="car-nav">
-                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()" disabled>←</button>
-                      <button type="button" class="car-btn car-btn--next" id="nextBtn0" onclick="nextSlide()" disabled>Siguiente →</button>
+                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()" disabled>&#8592; Anterior</button>
+                      <button type="button" class="car-btn car-btn--next" id="next0" onclick="nextSlide()" disabled>Siguiente &#8594;</button>
                     </div>
                   </div>
                 </div>
 
-                <!-- ── Slide 2: Luces ───────────────────────────── -->
+                <!-- Slide 2 — Luces ───────────────────────────── -->
                 <div class="car-slide">
-                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#1a2b3c 0%,#2a4060 100%)">
-                    <span class="car-slide__hero-icon">💡</span>
+                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#1a2b3c,#2a4060)">
+                    <span class="car-slide__icon">&#128161;</span>
                     <div>
-                      <div class="car-slide__hero-label">Categoría 2 / 4</div>
-                      <div class="car-slide__hero-title">Sistema de Iluminación</div>
+                      <div class="car-slide__cat">Categoría 2 / 4</div>
+                      <div class="car-slide__name">Sistema de Iluminación</div>
                     </div>
                   </div>
-                  <div class="car-slide__body car-slide__body--grid">
+                  <div class="car-slide__body car-slide__body--2col">
                     <% [
                       'Luces de Cruce / Carretera',
                       'Intermitentes / Emergencia',
@@ -109,70 +150,76 @@
                       'Iluminación de Matrícula'
                     ].forEach(item => { %>
                       <label class="chk-row">
-                        <input type="checkbox" name="lights_items[]" value="<%= item %>" class="chk-box" />
                         <span class="chk-label"><%= item %></span>
+                        <input type="checkbox" name="lights_items[]" value="<%= item %>" class="chk-box" />
                       </label>
                     <% }) %>
                   </div>
                   <div class="car-slide__footer">
-                    <div class="star-group" data-field="lights_rating">
-                      <span class="star-group__label">Calificación general</span>
+                    <div class="star-row">
+                      <span class="star-row__label">Calificación general</span>
                       <div class="stars" id="starsLights">
-                        <% for(let s=1;s<=5;s++) { %><span class="star" data-val="<%= s %>" onclick="rateStar('lights_rating',<%= s %>)">★</span><% } %>
+                        <% for(let s=1;s<=5;s++) { %>
+                          <span class="star" data-val="<%= s %>"
+                                onclick="rateStar('lights_rating',<%= s %>)">&#9733;</span>
+                        <% } %>
                       </div>
                       <input type="hidden" name="lights_rating" id="lights_rating" value="" />
                     </div>
                     <div class="car-nav">
-                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()">←</button>
-                      <button type="button" class="car-btn car-btn--next" id="nextBtn1" onclick="nextSlide()" disabled>Siguiente →</button>
+                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()">&#8592; Anterior</button>
+                      <button type="button" class="car-btn car-btn--next" id="next1" onclick="nextSlide()" disabled>Siguiente &#8594;</button>
                     </div>
                   </div>
                 </div>
 
-                <!-- ── Slide 3: Neumáticos ──────────────────────── -->
+                <!-- Slide 3 — Neumáticos ──────────────────────── -->
                 <div class="car-slide">
-                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#0d2438 0%,#1a3a5c 100%)">
-                    <span class="car-slide__hero-icon">🔵</span>
+                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#0d2438,#1a3a5c)">
+                    <span class="car-slide__icon">&#9898;</span>
                     <div>
-                      <div class="car-slide__hero-label">Categoría 3 / 4</div>
-                      <div class="car-slide__hero-title">Ruedas y Neumáticos</div>
+                      <div class="car-slide__cat">Categoría 3 / 4</div>
+                      <div class="car-slide__name">Ruedas y Neumáticos</div>
                     </div>
                   </div>
                   <div class="car-slide__body">
                     <% [
-                      'Presión de Aire (Visual/Medida)',
-                      'Profundidad del Dibujo (Mín 1.6mm)',
+                      'Presión de Aire (Visual / Medida)',
+                      'Profundidad del Dibujo (Mín 1.6 mm)',
                       'Desgaste Irregular / Daños Visibles',
                       'Tuercas y Espárragos de Rueda'
                     ].forEach(item => { %>
                       <label class="chk-row">
-                        <input type="checkbox" name="tires_items[]" value="<%= item %>" class="chk-box" />
                         <span class="chk-label"><%= item %></span>
+                        <input type="checkbox" name="tires_items[]" value="<%= item %>" class="chk-box" />
                       </label>
                     <% }) %>
                   </div>
                   <div class="car-slide__footer">
-                    <div class="star-group">
-                      <span class="star-group__label">Calificación general</span>
+                    <div class="star-row">
+                      <span class="star-row__label">Calificación general</span>
                       <div class="stars" id="starsTires">
-                        <% for(let s=1;s<=5;s++) { %><span class="star" data-val="<%= s %>" onclick="rateStar('tires_rating',<%= s %>)">★</span><% } %>
+                        <% for(let s=1;s<=5;s++) { %>
+                          <span class="star" data-val="<%= s %>"
+                                onclick="rateStar('tires_rating',<%= s %>)">&#9733;</span>
+                        <% } %>
                       </div>
                       <input type="hidden" name="tires_rating" id="tires_rating" value="" />
                     </div>
                     <div class="car-nav">
-                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()">←</button>
-                      <button type="button" class="car-btn car-btn--next" id="nextBtn2" onclick="nextSlide()" disabled>Siguiente →</button>
+                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()">&#8592; Anterior</button>
+                      <button type="button" class="car-btn car-btn--next" id="next2" onclick="nextSlide()" disabled>Siguiente &#8594;</button>
                     </div>
                   </div>
                 </div>
 
-                <!-- ── Slide 4: Seguridad ───────────────────────── -->
+                <!-- Slide 4 — Seguridad ───────────────────────── -->
                 <div class="car-slide">
-                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#041627 0%,#fd8b00 160%)">
-                    <span class="car-slide__hero-icon">🛡</span>
+                  <div class="car-slide__hero" style="background:linear-gradient(135deg,#041627,#7c3a00)">
+                    <span class="car-slide__icon">&#128737;</span>
                     <div>
-                      <div class="car-slide__hero-label">Categoría 4 / 4</div>
-                      <div class="car-slide__hero-title">Elementos de Seguridad</div>
+                      <div class="car-slide__cat">Categoría 4 / 4</div>
+                      <div class="car-slide__name">Elementos de Seguridad</div>
                     </div>
                   </div>
                   <div class="car-slide__body">
@@ -183,22 +230,25 @@
                       'Cinturones de Seguridad'
                     ].forEach(item => { %>
                       <label class="chk-row">
-                        <input type="checkbox" name="safety_items[]" value="<%= item %>" class="chk-box" />
                         <span class="chk-label"><%= item %></span>
+                        <input type="checkbox" name="safety_items[]" value="<%= item %>" class="chk-box" />
                       </label>
                     <% }) %>
                   </div>
                   <div class="car-slide__footer">
-                    <div class="star-group">
-                      <span class="star-group__label">Calificación general</span>
+                    <div class="star-row">
+                      <span class="star-row__label">Calificación general</span>
                       <div class="stars" id="starsSafety">
-                        <% for(let s=1;s<=5;s++) { %><span class="star" data-val="<%= s %>" onclick="rateStar('safety_rating',<%= s %>)">★</span><% } %>
+                        <% for(let s=1;s<=5;s++) { %>
+                          <span class="star" data-val="<%= s %>"
+                                onclick="rateStar('safety_rating',<%= s %>)">&#9733;</span>
+                        <% } %>
                       </div>
                       <input type="hidden" name="safety_rating" id="safety_rating" value="" />
                     </div>
                     <div class="car-nav">
-                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()">←</button>
-                      <span class="car-complete-hint">Completa el lado derecho y envía</span>
+                      <button type="button" class="car-btn car-btn--prev" onclick="prevSlide()">&#8592; Anterior</button>
+                      <span class="car-hint">Completa la columna derecha y envía</span>
                     </div>
                   </div>
                 </div>
@@ -207,84 +257,96 @@
             </div><!-- /car-wrap -->
           </div><!-- /insp-left -->
 
-          <!-- RIGHT: Damage map + observations + photos + signature ─ -->
+          <!-- RIGHT 4/12 — Evidence panels ───────────────────── -->
           <div class="insp-right">
 
+            <!-- Observations -->
+            <section class="insp-card">
+              <h3 class="insp-card__title">Observaciones</h3>
+              <textarea name="notes" class="input input--textarea insp-obs"
+                placeholder="Describa cualquier anomalía detectada…"></textarea>
+            </section>
+
             <!-- Vehicle damage map -->
-            <section class="insp-panel">
-              <h3 class="insp-panel__title">Mapa de Daños</h3>
-              <p class="insp-panel__sub">Haz clic sobre la imagen para marcar las áreas afectadas</p>
-              <div class="damage-wrap" id="damageWrap">
-                <img id="vehicleImg" src="" alt="Selecciona un vehículo" class="damage-img" />
-                <canvas id="damageCanvas" class="damage-canvas"></canvas>
-                <div class="damage-placeholder" id="damagePlaceholder">
-                  <span>Selecciona un vehículo para activar el mapa</span>
+            <section class="insp-card">
+              <h3 class="insp-card__title">Mapa de Daños</h3>
+              <p class="insp-card__sub">Toca la imagen para marcar áreas afectadas</p>
+              <div class="dmg-wrap" id="dmgWrap">
+                <img id="vehicleImg" src="" alt="" class="dmg-img" />
+                <canvas id="dmgCanvas" class="dmg-canvas"></canvas>
+                <div class="dmg-placeholder" id="dmgPlaceholder">
+                  Selecciona un vehículo para activar el mapa
                 </div>
               </div>
-              <div class="damage-actions">
+              <div class="dmg-foot">
                 <button type="button" class="btn btn--ghost btn--sm" onclick="clearDamage()">Limpiar marcas</button>
-                <span class="damage-hint" id="damageCount">0 marcas</span>
+                <span class="dmg-count" id="dmgCount">0 marcas</span>
               </div>
               <input type="hidden" name="damage_map" id="damageMapData" />
             </section>
 
-            <!-- Notes / Observations -->
-            <section class="insp-panel">
-              <h3 class="insp-panel__title">Observaciones y Notas</h3>
-              <textarea name="notes" class="input input--textarea" rows="4"
-                placeholder="Describa cualquier anomalía detectada..."></textarea>
-            </section>
-
             <!-- Photo evidence -->
-            <section class="insp-panel">
-              <h3 class="insp-panel__title">Evidencia Fotográfica</h3>
+            <section class="insp-card">
+              <h3 class="insp-card__title">Evidencia Fotográfica</h3>
               <label class="photo-drop" for="photoInput">
-                <span class="photo-drop__icon">📷</span>
-                <span class="photo-drop__text">Tocar para subir fotos de desperfectos</span>
-                <span class="photo-drop__hint">Máx. 5 imágenes · JPG, PNG, WEBP · 5 MB c/u</span>
+                <span class="photo-drop__icon">&#128247;</span>
+                <p class="photo-drop__text">Tocar para subir fotos de desperfectos</p>
               </label>
               <input type="file" id="photoInput" name="evidencia" multiple accept="image/*"
-                class="photo-file-input" onchange="previewPhotos(this)" />
-              <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+                     class="photo-file-input" onchange="previewPhotos(this)" />
+              <div class="photo-preview-grid" id="photoGrid"></div>
             </section>
 
             <!-- Digital signature -->
-            <section class="insp-panel">
-              <h3 class="insp-panel__title">Firma Digital del Conductor</h3>
-              <div class="sig-wrap">
-                <canvas id="signatureCanvas" width="380" height="130" class="signature-canvas"></canvas>
-                <span class="sig-guide">Firme aquí</span>
+            <section class="insp-card">
+              <h3 class="insp-card__title">Firma Digital del Conductor</h3>
+              <div class="sig-box">
+                <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                <div class="sig-baseline"></div>
+                <p class="sig-hint">Firme aquí</p>
               </div>
-              <div class="sig-actions">
-                <button type="button" class="btn btn--ghost btn--sm" onclick="clearSignature()">Limpiar firma</button>
+              <div class="sig-foot">
+                <span class="sig-name" id="sigDriverName">—</span>
+                <button type="button" class="btn btn--ghost btn--sm"
+                        onclick="clearSignature()">Limpiar</button>
               </div>
               <input type="hidden" name="signature" id="signatureData" />
             </section>
 
             <!-- Submit -->
             <button type="submit" class="btn-submit-insp">
-              <span>FINALIZAR INSPECCIÓN</span>
+              <span class="btn-submit-insp__icon">&#10148;</span>
+              FINALIZAR INSPECCIÓN
             </button>
 
           </div><!-- /insp-right -->
-        </div><!-- /insp-body -->
+        </div><!-- /insp-grid -->
       </form>
+    </div><!-- /content -->
 
+    <!-- Success toast -->
+    <div class="insp-toast" id="inspToast">
+      <span class="insp-toast__icon">&#10003;</span>
+      <div>
+        <strong>Inspección Registrada</strong>
+        <p id="toastMsg"></p>
+      </div>
     </div>
+
   </main>
 
   <script>
-  // ── Live date ─────────────────────────────────────────────────
+  /* ── Live date ──────────────────────────────────────────────── */
   (function tick() {
     const el = document.getElementById('liveDate');
     if (el) el.textContent = new Date().toLocaleString('es-ES', {
-      weekday:'short', day:'2-digit', month:'short', year:'numeric',
+      day:'2-digit', month:'short', year:'numeric',
       hour:'2-digit', minute:'2-digit'
-    });
+    }).toUpperCase();
     setTimeout(tick, 30000);
   })();
 
-  // ── Carousel ──────────────────────────────────────────────────
+  /* ── Carousel ───────────────────────────────────────────────── */
   let cur = 0;
   const TOTAL = 4;
   const track = document.getElementById('carTrack');
@@ -294,45 +356,34 @@
     cur = Math.max(0, Math.min(TOTAL - 1, n));
     track.style.transform = `translateX(-${cur * 100}%)`;
     dots.forEach((d, i) => d.classList.toggle('car-dot--active', i === cur));
-    // Disable prev on first, handle "next" state
     document.querySelectorAll('.car-btn--prev').forEach(b => b.disabled = cur === 0);
   }
-
   function nextSlide() { goToSlide(cur + 1); }
   function prevSlide() { goToSlide(cur - 1); }
 
-  // ── Star rating ───────────────────────────────────────────────
-  const ratings = { engine_rating: 0, lights_rating: 0, tires_rating: 0, safety_rating: 0 };
-  const nextBtns = ['nextBtn0','nextBtn1','nextBtn2'];
+  /* ── Star rating ────────────────────────────────────────────── */
   const starContainers = {
     engine_rating: document.getElementById('starsEngine'),
     lights_rating: document.getElementById('starsLights'),
     tires_rating:  document.getElementById('starsTires'),
     safety_rating: document.getElementById('starsSafety'),
   };
+  const nextIds = ['next0','next1','next2'];
 
   function rateStar(field, val) {
-    ratings[field] = val;
     document.getElementById(field).value = val;
-    renderStars(field, val);
-    // Enable next button for the current slide
-    const nextBtnId = 'nextBtn' + cur;
-    const btn = document.getElementById(nextBtnId);
+    // Render filled stars
+    starContainers[field].querySelectorAll('.star').forEach(s =>
+      s.classList.toggle('star--on', parseInt(s.dataset.val) <= val)
+    );
+    // Enable next button
+    const btn = document.getElementById('next' + cur);
     if (btn) btn.disabled = false;
-    // Auto-advance after 600ms if not last slide
-    if (cur < TOTAL - 1) setTimeout(() => goToSlide(cur + 1), 600);
+    // Auto-advance after 650ms (not on last slide)
+    if (cur < TOTAL - 1) setTimeout(() => goToSlide(cur + 1), 650);
   }
 
-  function renderStars(field, val) {
-    const container = starContainers[field];
-    if (!container) return;
-    container.querySelectorAll('.star').forEach(s => {
-      const v = parseInt(s.dataset.val);
-      s.classList.toggle('star--on', v <= val);
-    });
-  }
-
-  // Star hover effects
+  // Hover preview
   document.querySelectorAll('.stars').forEach(group => {
     group.querySelectorAll('.star').forEach(star => {
       star.addEventListener('mouseenter', () => {
@@ -340,13 +391,12 @@
         group.querySelectorAll('.star').forEach(s =>
           s.classList.toggle('star--hover', parseInt(s.dataset.val) <= v));
       });
-      star.addEventListener('mouseleave', () => {
-        group.querySelectorAll('.star').forEach(s => s.classList.remove('star--hover'));
-      });
+      star.addEventListener('mouseleave', () =>
+        group.querySelectorAll('.star').forEach(s => s.classList.remove('star--hover')));
     });
   });
 
-  // ── Vehicle image + damage map ────────────────────────────────
+  /* ── Vehicle select → header + image ───────────────────────── */
   const IMAGE_MAP = {
     'camión':      '/images/Trailer.png',
     'furgoneta':   '/images/camioneta.png',
@@ -354,121 +404,148 @@
     'motocicleta': '/images/Moto.png',
   };
 
-  const damageCanvas   = document.getElementById('damageCanvas');
-  const damageCtx      = damageCanvas.getContext('2d');
-  const vehicleImg     = document.getElementById('vehicleImg');
-  const placeholder    = document.getElementById('damagePlaceholder');
-  const damageWrap     = document.getElementById('damageWrap');
-  const damageCountEl  = document.getElementById('damageCount');
-  const marks          = [];
-  let   canvasReady    = false;
+  const dmgWrap   = document.getElementById('dmgWrap');
+  const dmgCanvas = document.getElementById('dmgCanvas');
+  const dmgCtx    = dmgCanvas.getContext('2d');
+  const vImg      = document.getElementById('vehicleImg');
+  const dmgPH     = document.getElementById('dmgPlaceholder');
+  const dmgCount  = document.getElementById('dmgCount');
+  const marks     = [];
+  let   ready     = false;
+
+  function activateCanvas() {
+    dmgCanvas.width  = dmgWrap.clientWidth;
+    dmgCanvas.height = dmgWrap.clientHeight;
+    ready = true;
+    marks.length = 0;
+    dmgCtx.clearRect(0, 0, dmgCanvas.width, dmgCanvas.height);
+    updateCount();
+  }
 
   function onVehicleChange(sel) {
     const opt  = sel.options[sel.selectedIndex];
-    const type = opt ? opt.dataset.type : '';
+    const type = opt.dataset.type || '';
+    const lbl  = opt.dataset.label || '—';
     const src  = IMAGE_MAP[type] || '';
-    if (!src) { placeholder.style.display='flex'; return; }
-    placeholder.style.display = 'none';
-    vehicleImg.src = src;
-    vehicleImg.onload = function() {
-      // Fit canvas to the rendered image size
-      const rect = vehicleImg.getBoundingClientRect();
-      damageCanvas.width  = damageWrap.clientWidth;
-      damageCanvas.height = damageWrap.clientHeight;
-      canvasReady = true;
-      marks.length = 0;
-      damageCtx.clearRect(0, 0, damageCanvas.width, damageCanvas.height);
-      updateDamageCount();
-    };
+
+    // Update header
+    document.getElementById('headerVehicle').textContent = lbl;
+    document.getElementById('sigDriverName').textContent = '—';
+
+    if (!src) {
+      dmgPH.style.display = 'flex';
+      vImg.src = '';
+      ready = false;
+      return;
+    }
+
+    dmgPH.style.display = 'none';
+
+    // Fix: set onload BEFORE src so cached images also trigger it
+    vImg.onload = activateCanvas;
+    vImg.src = src;
+
+    // If already cached (complete + has natural dimensions) fire immediately
+    if (vImg.complete && vImg.naturalWidth > 0) activateCanvas();
   }
 
-  damageCanvas.addEventListener('click', function(e) {
-    if (!canvasReady) return;
-    const rect = damageCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    marks.push({x, y});
-    redrawMarks();
-    saveDamageMap();
-  });
+  // Update driver name in signature area as user types
+  const driverInput = document.querySelector('input[name="driver_name"]');
+  if (driverInput) {
+    driverInput.addEventListener('input', function() {
+      document.getElementById('sigDriverName').textContent = this.value || '—';
+    });
+  }
 
-  // Touch support for damage canvas
-  damageCanvas.addEventListener('touchend', function(e) {
-    if (!canvasReady) return;
+  /* ── Damage canvas clicks ───────────────────────────────────── */
+  dmgCanvas.addEventListener('click', e => {
+    if (!ready) return;
+    const r = dmgCanvas.getBoundingClientRect();
+    marks.push({ x: e.clientX - r.left, y: e.clientY - r.top });
+    redraw();
+    saveMap();
+  });
+  dmgCanvas.addEventListener('touchend', e => {
+    if (!ready) return;
     e.preventDefault();
     const t = e.changedTouches[0];
-    const rect = damageCanvas.getBoundingClientRect();
-    marks.push({ x: t.clientX - rect.left, y: t.clientY - rect.top });
-    redrawMarks();
-    saveDamageMap();
+    const r = dmgCanvas.getBoundingClientRect();
+    marks.push({ x: t.clientX - r.left, y: t.clientY - r.top });
+    redraw();
+    saveMap();
   });
 
-  function redrawMarks() {
-    damageCtx.clearRect(0, 0, damageCanvas.width, damageCanvas.height);
-    marks.forEach(({x, y}, idx) => {
-      // Circle
-      damageCtx.beginPath();
-      damageCtx.arc(x, y, 18, 0, Math.PI * 2);
-      damageCtx.strokeStyle = '#ba1a1a';
-      damageCtx.lineWidth   = 2.5;
-      damageCtx.stroke();
-      // Number label
-      damageCtx.fillStyle   = '#ba1a1a';
-      damageCtx.font        = 'bold 11px Inter, sans-serif';
-      damageCtx.textAlign   = 'center';
-      damageCtx.textBaseline = 'middle';
-      damageCtx.fillText(idx + 1, x, y);
+  function redraw() {
+    dmgCtx.clearRect(0, 0, dmgCanvas.width, dmgCanvas.height);
+    marks.forEach(({ x, y }, i) => {
+      dmgCtx.beginPath();
+      dmgCtx.arc(x, y, 16, 0, Math.PI * 2);
+      dmgCtx.strokeStyle = '#ba1a1a';
+      dmgCtx.lineWidth = 2.5;
+      dmgCtx.stroke();
+      dmgCtx.fillStyle = 'rgba(186,26,26,0.12)';
+      dmgCtx.fill();
+      dmgCtx.fillStyle = '#ba1a1a';
+      dmgCtx.font = 'bold 10px Inter,sans-serif';
+      dmgCtx.textAlign = 'center';
+      dmgCtx.textBaseline = 'middle';
+      dmgCtx.fillText(i + 1, x, y);
     });
-    updateDamageCount();
+    updateCount();
   }
 
-  function updateDamageCount() {
-    damageCountEl.textContent = marks.length + (marks.length === 1 ? ' marca' : ' marcas');
+  function updateCount() {
+    dmgCount.textContent = marks.length + (marks.length === 1 ? ' marca' : ' marcas');
   }
 
-  function saveDamageMap() {
-    document.getElementById('damageMapData').value = damageCanvas.toDataURL();
+  function saveMap() {
+    document.getElementById('damageMapData').value = dmgCanvas.toDataURL();
   }
 
   function clearDamage() {
     marks.length = 0;
-    damageCtx.clearRect(0, 0, damageCanvas.width, damageCanvas.height);
+    dmgCtx.clearRect(0, 0, dmgCanvas.width, dmgCanvas.height);
     document.getElementById('damageMapData').value = '';
-    updateDamageCount();
+    updateCount();
   }
 
-  // ── Signature ─────────────────────────────────────────────────
-  const sigCanvas = document.getElementById('signatureCanvas');
-  const sigCtx    = sigCanvas.getContext('2d');
-  let drawing     = false;
+  /* ── Signature canvas ───────────────────────────────────────── */
+  const sigCv  = document.getElementById('signatureCanvas');
+  const sigCtx = sigCv.getContext('2d');
+  let   draw   = false;
 
-  function sigPos(e) {
-    const r = sigCanvas.getBoundingClientRect();
-    return { x:(e.clientX||e.pageX)-r.left, y:(e.clientY||e.pageY)-r.top };
+  // Size canvas to its CSS box
+  function resizeSig() {
+    sigCv.width  = sigCv.offsetWidth;
+    sigCv.height = sigCv.offsetHeight;
   }
-  sigCanvas.addEventListener('mousedown',  e => { drawing=true; sigCtx.beginPath(); sigCtx.moveTo(sigPos(e).x, sigPos(e).y); });
-  sigCanvas.addEventListener('mousemove',  e => { if(!drawing)return; const p=sigPos(e); sigCtx.lineTo(p.x,p.y); sigCtx.strokeStyle='#041627'; sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.stroke(); });
-  sigCanvas.addEventListener('mouseup',    () => { drawing=false; saveSignature(); });
-  sigCanvas.addEventListener('mouseleave', () => { drawing=false; });
-  sigCanvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const t=e.touches[0]; const p=sigPos(t); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); });
-  sigCanvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!drawing)return; const t=e.touches[0]; const p=sigPos(t); sigCtx.lineTo(p.x,p.y); sigCtx.strokeStyle='#041627'; sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.stroke(); });
-  sigCanvas.addEventListener('touchend',   () => { drawing=false; saveSignature(); });
+  window.addEventListener('load', resizeSig);
 
-  function saveSignature() { document.getElementById('signatureData').value = sigCanvas.toDataURL(); }
-  function clearSignature() { sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); document.getElementById('signatureData').value=''; }
+  function sp(e) {
+    const r = sigCv.getBoundingClientRect();
+    return { x: (e.clientX ?? e.pageX) - r.left, y: (e.clientY ?? e.pageY) - r.top };
+  }
+  sigCv.addEventListener('mousedown',  e => { draw=true; sigCtx.beginPath(); const p=sp(e); sigCtx.moveTo(p.x,p.y); });
+  sigCv.addEventListener('mousemove',  e => { if(!draw)return; const p=sp(e); sigCtx.lineTo(p.x,p.y); sigCtx.strokeStyle='#041627'; sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.stroke(); });
+  sigCv.addEventListener('mouseup',    () => { draw=false; saveSig(); });
+  sigCv.addEventListener('mouseleave', () => { draw=false; });
+  sigCv.addEventListener('touchstart', e => { e.preventDefault(); draw=true; const p=sp(e.touches[0]); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); });
+  sigCv.addEventListener('touchmove',  e => { e.preventDefault(); if(!draw)return; const p=sp(e.touches[0]); sigCtx.lineTo(p.x,p.y); sigCtx.strokeStyle='#041627'; sigCtx.lineWidth=2; sigCtx.lineCap='round'; sigCtx.stroke(); });
+  sigCv.addEventListener('touchend',   () => { draw=false; saveSig(); });
+  function saveSig()   { document.getElementById('signatureData').value = sigCv.toDataURL(); }
+  function clearSignature() { sigCtx.clearRect(0,0,sigCv.width,sigCv.height); document.getElementById('signatureData').value=''; }
 
-  // ── Photo preview ─────────────────────────────────────────────
+  /* ── Photo preview ──────────────────────────────────────────── */
   function previewPhotos(input) {
-    const grid = document.getElementById('photoPreviewGrid');
+    const grid = document.getElementById('photoGrid');
     grid.innerHTML = '';
-    const files = Array.from(input.files).slice(0, 5);
-    files.forEach(file => {
+    Array.from(input.files).slice(0, 5).forEach(file => {
       const reader = new FileReader();
       reader.onload = e => {
-        const div = document.createElement('div');
-        div.className = 'photo-thumb';
-        div.innerHTML = `<img src="${e.target.result}" alt="preview" />`;
-        grid.appendChild(div);
+        const d = document.createElement('div');
+        d.className = 'photo-thumb';
+        d.innerHTML = `<img src="${e.target.result}" alt="preview" />`;
+        grid.appendChild(d);
       };
       reader.readAsDataURL(file);
     });

@@ -29,7 +29,7 @@ function ratingToStatus(r) {
 
 exports.store = async (req, res, next) => {
   try {
-    const { vehicle_id, driver_name,
+    const { vehicle_id, driver_name, route,
             engine_rating, lights_rating, tires_rating, safety_rating,
             notes, signature, damage_map } = req.body;
 
@@ -42,11 +42,11 @@ exports.store = async (req, res, next) => {
 
     await db.query(
       `INSERT INTO inspections
-        (vehicle_id, driver_name, engine, lights, tires, safety, result,
+        (vehicle_id, driver_name, route, engine, lights, tires, safety, result,
          engine_rating, lights_rating, tires_rating, safety_rating,
          notes, photos, damage_map, signature)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [vehicle_id, driver_name, engine, lights, tires, safety, result,
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [vehicle_id, driver_name, route || null, engine, lights, tires, safety, result,
        engine_rating || null, lights_rating || null, tires_rating || null, safety_rating || null,
        notes, photos, damage_map || null, signature]
     );
@@ -59,7 +59,7 @@ exports.store = async (req, res, next) => {
 exports.show = async (req, res, next) => {
   try {
     const [rows] = await db.query(
-      'SELECT i.*, v.plate, v.brand, v.model FROM inspections i JOIN vehicles v ON i.vehicle_id = v.id WHERE i.id = ?',
+      'SELECT i.*, v.plate, v.brand, v.model, v.type FROM inspections i JOIN vehicles v ON i.vehicle_id = v.id WHERE i.id = ?',
       [req.params.id]
     );
     if (!rows.length) return res.redirect('/inspecciones');

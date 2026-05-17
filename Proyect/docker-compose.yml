@@ -15,6 +15,11 @@ services:
         condition: service_healthy
     volumes:
       - ./public/uploads:/app/public/uploads
+      - ./views:/app/views
+      - ./public/css:/app/public/css
+      - ./public/js:/app/public/js
+      - ./controllers:/app/controllers
+      - ./routes:/app/routes
 
   db:
     image: mysql:8.0

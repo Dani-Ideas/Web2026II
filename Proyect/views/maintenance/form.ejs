@@ -7,11 +7,25 @@
     <%- include('../partials/topbar') %>
     <div class="content content--narrow">
 
+      <% if (locked) { %>
+        <div class="maint-lock-banner">
+          <span class="maint-lock-banner__icon">&#128274;</span>
+          <div>
+            <strong>Mantenimiento programado — bloqueado</strong>
+            <p>Este registro fue generado automáticamente por la programación de mantenimiento.
+               Solo podrá editarse a partir del
+               <strong><%= new Date(record.scheduled_date).toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'}) %></strong>.
+            </p>
+          </div>
+        </div>
+      <% } %>
+
       <form method="POST" action="<%= record ? '/mantenimiento/' + record.id : '/mantenimiento' %>" class="form">
         <div class="form__grid">
+
           <div class="form__group">
             <label class="form__label">Vehículo</label>
-            <select name="vehicle_id" class="input input--select" required>
+            <select name="vehicle_id" class="input input--select" required <%= locked ? 'disabled' : '' %>>
               <option value="">Seleccionar vehículo...</option>
               <% vehicles.forEach(v => { %>
                 <option value="<%= v.id %>" <%= record && record.vehicle_id === v.id ? 'selected' : '' %>>
@@ -20,43 +34,63 @@
               <% }) %>
             </select>
           </div>
+
           <div class="form__group">
             <label class="form__label">Tipo</label>
-            <select name="type" class="input input--select">
+            <select name="type" class="input input--select" <%= locked ? 'disabled' : '' %>>
               <option value="preventivo" <%= !record || record.type === 'preventivo' ? 'selected' : '' %>>Preventivo</option>
-              <option value="correctivo" <%= record && record.type === 'correctivo' ? 'selected' : '' %>>Correctivo</option>
-              <option value="predictivo" <%= record && record.type === 'predictivo' ? 'selected' : '' %>>Predictivo</option>
+              <option value="correctivo" <%= record && record.type === 'correctivo'  ? 'selected' : '' %>>Correctivo</option>
+              <option value="predictivo" <%= record && record.type === 'predictivo'  ? 'selected' : '' %>>Predictivo</option>
             </select>
           </div>
+
           <div class="form__group form__group--full">
             <label class="form__label">Descripción</label>
-            <textarea name="description" class="input input--textarea" rows="3" required><%= record ? record.description : '' %></textarea>
+            <textarea name="description" class="input input--textarea" rows="3"
+              required <%= locked ? 'readonly' : '' %>><%= record ? record.description : '' %></textarea>
           </div>
+
           <div class="form__group">
             <label class="form__label">Costo (USD)</label>
-            <input type="number" name="cost" class="input" step="0.01" min="0" value="<%= record ? record.cost : '' %>" />
+            <input type="number" name="cost" class="input" step="0.01" min="0"
+              value="<%= record ? record.cost : '' %>" <%= locked ? 'readonly' : '' %> />
           </div>
+
           <div class="form__group">
             <label class="form__label">Estado</label>
-            <select name="status" class="input input--select">
-              <option value="pendiente" <%= !record || record.status === 'pendiente' ? 'selected' : '' %>>Pendiente</option>
-              <option value="en_progreso" <%= record && record.status === 'en_progreso' ? 'selected' : '' %>>En Progreso</option>
-              <option value="completado" <%= record && record.status === 'completado' ? 'selected' : '' %>>Completado</option>
+            <select name="status" class="input input--select" <%= locked ? 'disabled' : '' %>>
+              <option value="pendiente"   <%= !record || record.status === 'pendiente'   ? 'selected' : '' %>>Pendiente</option>
+              <option value="en_progreso" <%= record && record.status === 'en_progreso'  ? 'selected' : '' %>>En Progreso</option>
+              <option value="completado"  <%= record && record.status === 'completado'   ? 'selected' : '' %>>Completado</option>
             </select>
           </div>
+
           <div class="form__group">
-            <label class="form__label">Fecha Programada</label>
-            <input type="date" name="scheduled_date" class="input" value="<%= record && record.scheduled_date ? record.scheduled_date.toISOString().split('T')[0] : '' %>" />
+            <label class="form__label">
+              Fecha Programada
+              <% if (record && record.is_programmed) { %>
+                <span class="form__optional">Programado</span>
+              <% } %>
+            </label>
+            <input type="date" name="scheduled_date" class="input"
+              value="<%= record && record.scheduled_date ? record.scheduled_date.toISOString().split('T')[0] : '' %>"
+              <%= locked ? 'readonly' : '' %> />
           </div>
+
           <div class="form__group">
             <label class="form__label">Fecha de Completado</label>
-            <input type="date" name="completed_date" class="input" value="<%= record && record.completed_date ? record.completed_date.toISOString().split('T')[0] : '' %>" />
+            <input type="date" name="completed_date" class="input"
+              value="<%= record && record.completed_date ? record.completed_date.toISOString().split('T')[0] : '' %>"
+              <%= locked ? 'readonly' : '' %> />
           </div>
+
         </div>
 
         <div class="form__actions">
           <a href="/mantenimiento" class="btn btn--ghost">Cancelar</a>
-          <button type="submit" class="btn btn--primary"><%= record ? 'Guardar Cambios' : 'Registrar' %></button>
+          <% if (!locked) { %>
+            <button type="submit" class="btn btn--primary"><%= record ? 'Guardar Cambios' : 'Registrar' %></button>
+          <% } %>
         </div>
       </form>
 

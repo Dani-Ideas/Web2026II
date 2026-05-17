@@ -46,6 +46,7 @@
                 <td><span class="badge badge--<%= v.status %>"><%= v.status %></span></td>
                 <td class="table__mono"><%= v.insurance_expiry ? new Date(v.insurance_expiry).toLocaleDateString('es-ES') : '—' %></td>
                 <td class="table__actions">
+                  <a href="/flota/<%= v.id %>/historial" class="btn btn--primary btn--sm">Historial</a>
                   <a href="/flota/<%= v.id %>/editar" class="btn btn--ghost btn--sm">Editar</a>
                   <form method="POST" action="/flota/<%= v.id %>/eliminar" style="display:inline"
                     onsubmit="return confirm('¿Eliminar este vehículo?')">

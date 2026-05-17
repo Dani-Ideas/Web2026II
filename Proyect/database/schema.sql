@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   status           ENUM('activo','inactivo','mantenimiento') NOT NULL DEFAULT 'activo',
   fuel_capacity    DECIMAL(6,2),
   insurance_expiry DATE,
+  phone            VARCHAR(20),
   created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS inspections (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   vehicle_id  INT NOT NULL,
   driver_name VARCHAR(120) NOT NULL,
+  route       VARCHAR(2),
   engine      ENUM('pass','caution','fail') NOT NULL,
   lights      ENUM('pass','caution','fail') NOT NULL,
   tires       ENUM('pass','caution','fail') NOT NULL,
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS maintenance (
   status         ENUM('pendiente','en_progreso','completado') NOT NULL DEFAULT 'pendiente',
   scheduled_date DATE,
   completed_date DATE,
+  is_programmed  TINYINT NOT NULL DEFAULT 0,
   created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE

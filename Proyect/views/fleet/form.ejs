@@ -55,6 +55,14 @@
               <input type="date" name="insurance_expiry" class="input"
                 value="<%= vehicle && vehicle.insurance_expiry ? vehicle.insurance_expiry.toISOString().split('T')[0] : '' %>" />
             </div>
+            <div class="form__group">
+              <label class="form__label">
+                Teléfono GPS
+                <span class="form__optional">Rastreo</span>
+              </label>
+              <input type="tel" name="phone" class="input" placeholder="+52 55 1234 5678"
+                value="<%= vehicle && vehicle.phone ? vehicle.phone : '' %>" />
+            </div>
           </div>
         </div>
 

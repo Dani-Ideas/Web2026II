@@ -4,55 +4,317 @@
 <body class="layout">
   <%- include('../partials/sidebar', { currentPage: 'dashboard' }) %>
   <main class="main">
-    <%- include('../partials/topbar') %>
-    <div class="content">
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-card__label">Vehículos Totales</span>
-          <span class="stat-card__value"><%= stats.total %></span>
+    <div class="content db-page">
+
+      <!-- ── Page header ──────────────────────────────────────── -->
+      <div class="db-page-head">
+        <div>
+          <p class="insp-ph__sup">Estado Operativo</p>
+          <h2 class="db-headline">Resumen de Flota</h2>
         </div>
-        <div class="stat-card stat-card--active">
-          <span class="stat-card__label">Activos</span>
-          <span class="stat-card__value"><%= stats.active %></span>
-        </div>
-        <div class="stat-card stat-card--warning">
-          <span class="stat-card__label">Mantenimientos Pendientes</span>
-          <span class="stat-card__value"><%= stats.pendingMaintenance %></span>
+        <div class="db-head-meta">
+          <span class="db-date-chip">
+            &#128197;
+            <%= today.toLocaleDateString('es-ES',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).toUpperCase() %>
+          </span>
         </div>
       </div>
 
-      <section class="section">
-        <h2 class="section__title">Inspecciones Recientes</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Placa</th>
-              <th>Vehículo</th>
-              <th>Conductor</th>
-              <th>Resultado</th>
-              <th>Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if (recentInspections.length === 0) { %>
-              <tr><td colspan="5" class="table__empty">Sin inspecciones registradas</td></tr>
+      <!-- ── KPI 4-col ─────────────────────────────────────────── -->
+      <div class="db-kpi-grid">
+        <!-- Activos -->
+        <div class="db-kpi">
+          <div class="db-kpi__head">
+            <span class="db-kpi__icon db-kpi__icon--navy">&#128663;</span>
+            <span class="db-kpi__tag db-kpi__tag--pass">Operando</span>
+          </div>
+          <p class="db-kpi__label">Vehículos Activos</p>
+          <h3 class="db-kpi__val"><%= kpi.active %></h3>
+          <div class="db-bar">
+            <div class="db-bar__fill db-bar__fill--navy"
+                 style="width:<%= kpi.total>0 ? Math.round((kpi.active/kpi.total)*100) : 0 %>%"></div>
+          </div>
+        </div>
+        <!-- En mantenimiento -->
+        <div class="db-kpi">
+          <div class="db-kpi__head">
+            <span class="db-kpi__icon db-kpi__icon--orange">&#128295;</span>
+            <span class="db-kpi__tag db-kpi__tag--caution">Estable</span>
+          </div>
+          <p class="db-kpi__label">En Mantenimiento</p>
+          <h3 class="db-kpi__val"><%= kpi.in_maint %></h3>
+          <div class="db-bar">
+            <div class="db-bar__fill db-bar__fill--orange"
+                 style="width:<%= kpi.total>0 ? Math.round((kpi.in_maint/kpi.total)*100) : 0 %>%"></div>
+          </div>
+        </div>
+        <!-- Inspecciones pendientes -->
+        <div class="db-kpi">
+          <div class="db-kpi__head">
+            <span class="db-kpi__icon db-kpi__icon--teal">&#128203;</span>
+            <% if (kpi.pending_insp > 0) { %>
+              <span class="db-kpi__tag db-kpi__tag--fail"><%= kpi.pending_insp %> Urgente<%= kpi.pending_insp>1?'s':'' %></span>
             <% } else { %>
-              <% recentInspections.forEach(i => { %>
+              <span class="db-kpi__tag db-kpi__tag--pass">Al día</span>
+            <% } %>
+          </div>
+          <p class="db-kpi__label">Sin Inspección Hoy</p>
+          <h3 class="db-kpi__val"><%= kpi.pending_insp %></h3>
+          <div class="db-bar">
+            <div class="db-bar__fill db-bar__fill--teal"
+                 style="width:<%= kpi.active>0 ? Math.round((kpi.pending_insp/kpi.active)*100) : 0 %>%"></div>
+          </div>
+        </div>
+        <!-- Disponibilidad -->
+        <div class="db-kpi">
+          <div class="db-kpi__head">
+            <span class="db-kpi__icon db-kpi__icon--navy">&#9881;</span>
+            <span class="db-kpi__tag db-kpi__tag--pass">Óptimo</span>
+          </div>
+          <p class="db-kpi__label">Disponibilidad de Flota</p>
+          <h3 class="db-kpi__val"><%= kpi.availability %>%</h3>
+          <div class="db-bar">
+            <div class="db-bar__fill db-bar__fill--navy" style="width:<%= kpi.availability %>%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Main 3-col grid ───────────────────────────────────── -->
+      <div class="db-main-grid">
+
+        <!-- 2/3 — Chart + table ─────────────────────────────── -->
+        <div class="db-left">
+
+          <!-- Availability trend chart -->
+          <div class="db-card">
+            <div class="db-card__head">
+              <h4 class="db-card__title">Tendencia de Inspecciones — Últimos 7 Días</h4>
+              <div class="db-chart-legend">
+                <span class="db-chart-legend__item">
+                  <span class="db-chart-legend__dot" style="background:var(--navy)"></span>Aprobadas
+                </span>
+                <span class="db-chart-legend__item">
+                  <span class="db-chart-legend__dot" style="background:var(--orange)"></span>Fallidas
+                </span>
+              </div>
+            </div>
+            <div class="db-chart">
+              <% chartData.forEach(bar => {
+                   const total   = bar.pass + bar.fail;
+                   const pct     = Math.round((total / maxBar) * 100);
+                   const failPct = total > 0 ? Math.round((bar.fail / total) * 100) : 0;
+                   const passPct = 100 - failPct;
+              %>
+                <div class="db-chart__col">
+                  <div class="db-chart__bar-wrap">
+                    <div class="db-chart__bar" style="height:<%= pct %>%">
+                      <div class="db-chart__bar-pass" style="height:<%= passPct %>%"></div>
+                      <div class="db-chart__bar-fail" style="height:<%= failPct %>%"></div>
+                    </div>
+                    <% if (total > 0) { %>
+                      <span class="db-chart__num"><%= total %></span>
+                    <% } %>
+                  </div>
+                  <span class="db-chart__label"><%= bar.label %></span>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Fleet status table -->
+          <div class="db-card db-card--no-pad">
+            <div class="db-card__head db-card__head--navy">
+              <h4 class="db-card__title db-card__title--white">Estado de Flota</h4>
+            </div>
+            <table class="table">
+              <thead>
                 <tr>
-                  <td class="table__mono"><%= i.plate %></td>
-                  <td><%= i.brand %> <%= i.model %></td>
-                  <td><%= i.driver_name %></td>
-                  <td><span class="badge badge--<%= i.result %>"><%= i.result === 'pass' ? 'Aprobado' : 'Fallido' %></span></td>
-                  <td class="table__mono"><%= new Date(i.created_at).toLocaleDateString('es-ES') %></td>
+                  <th>Vehículo</th>
+                  <th>Estado</th>
+                  <th>Última Inspección</th>
+                  <th>Última Ruta</th>
+                  <th>Próximo Servicio</th>
+                  <th style="text-align:right">Ver</th>
                 </tr>
+              </thead>
+              <tbody>
+                <% if (fleetList.length === 0) { %>
+                  <tr><td colspan="6" class="table__empty">Sin vehículos registrados</td></tr>
+                <% } else { fleetList.forEach(v => { %>
+                  <tr>
+                    <td>
+                      <div class="maint-vehicle-plate"><%= v.plate %></div>
+                      <div class="maint-vehicle-name"><%= v.brand %> <%= v.model %></div>
+                    </td>
+                    <td><span class="badge badge--<%= v.status %>"><%= v.status %></span></td>
+                    <td>
+                      <% if (v.last_inspection) { %>
+                        <span class="badge badge--<%= v.last_result || 'pendiente' %>" style="font-size:10px">
+                          <%= v.last_result === 'pass' ? '✓' : v.last_result === 'fail' ? '✗' : '—' %>
+                        </span>
+                        <span class="table__mono" style="font-size:11px;margin-left:4px">
+                          <%= new Date(v.last_inspection).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}) %>
+                        </span>
+                      <% } else { %>
+                        <span style="color:var(--fail-text);font-size:11px;font-weight:700">Sin inspección</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (v.last_route) { %>
+                        <span class="db-route-badge">Ruta <%= v.last_route %></span>
+                      <% } else { %>—<% } %>
+                    </td>
+                    <td class="table__mono" style="font-size:12px">
+                      <% if (v.next_service) { %>
+                        <% const ns = new Date(v.next_service); const daysLeft = Math.ceil((ns - new Date()) / 86400000); %>
+                        <span style="color:<%= daysLeft <= 7 ? 'var(--orange)' : 'inherit' %>; font-weight:<%= daysLeft<=7?700:400 %>">
+                          <%= ns.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}) %>
+                        </span>
+                      <% } else { %>—<% } %>
+                    </td>
+                    <td style="text-align:right">
+                      <a href="/flota/<%= v.id %>/historial" class="btn btn--ghost btn--sm">&#8594;</a>
+                    </td>
+                  </tr>
+                <% }) } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 1/3 — Alerts ────────────────────────────────────── -->
+        <div class="db-alerts">
+          <div class="db-alerts__head">
+            <h4 class="db-alerts__title">Alertas Críticas</h4>
+            <span class="db-alerts__icon">&#9888;</span>
+          </div>
+          <div class="db-alerts__list">
+
+            <!-- Insurance expiry alerts -->
+            <% if (expiringIns.length > 0) { %>
+              <% expiringIns.forEach(v => { %>
+                <div class="db-alert-item db-alert-item--orange">
+                  <div class="db-alert-item__icon">&#128196;</div>
+                  <div class="db-alert-item__body">
+                    <div class="db-alert-item__top">
+                      <p class="db-alert-item__title">Seguro por vencer — <%= v.plate %></p>
+                      <span class="db-alert-item__age"><%= v.days_left %> días</span>
+                    </div>
+                    <p class="db-alert-item__desc"><%= v.brand %> <%= v.model %> · Vence en <%= v.days_left %> días</p>
+                    <a href="/flota" class="db-alert-item__action">Ver flota &#8594;</a>
+                  </div>
+                </div>
               <% }) %>
             <% } %>
-          </tbody>
-        </table>
-      </section>
 
-    </div>
+            <!-- Failed inspections -->
+            <% if (failedInsp.length > 0) { %>
+              <% failedInsp.forEach(f => { %>
+                <div class="db-alert-item db-alert-item--red">
+                  <div class="db-alert-item__icon">&#128683;</div>
+                  <div class="db-alert-item__body">
+                    <div class="db-alert-item__top">
+                      <p class="db-alert-item__title">Inspección fallida — <%= f.plate %></p>
+                      <span class="db-alert-item__age">
+                        <%= new Date(f.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short'}) %>
+                      </span>
+                    </div>
+                    <p class="db-alert-item__desc"><%= f.brand %> <%= f.model %> · Conductor: <%= f.driver_name %><% if(f.route){%> · Ruta <%=f.route%><%}%></p>
+                    <a href="/inspecciones/<%= f.id %>" class="db-alert-item__action">Ver reporte &#8594;</a>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+
+            <!-- Route deviation placeholder -->
+            <div class="db-alert-item db-alert-item--blue">
+              <div class="db-alert-item__icon">&#128205;</div>
+              <div class="db-alert-item__body">
+                <div class="db-alert-item__top">
+                  <p class="db-alert-item__title">Desviaciones de Ruta</p>
+                  <span class="db-alert-item__age">Demo</span>
+                </div>
+                <p class="db-alert-item__desc">El rastreo GPS por número telefónico no está activo en esta demo.</p>
+              </div>
+            </div>
+
+            <% if (expiringIns.length === 0 && failedInsp.length === 0) { %>
+              <div class="db-alerts__empty">&#10003; Sin alertas críticas activas</div>
+            <% } %>
+
+          </div>
+          <a href="/inspecciones/nueva" class="db-alerts__cta">+ Nueva Inspección</a>
+        </div>
+
+      </div><!-- /db-main-grid -->
+
+      <!-- ── Map section full-width ─────────────────────────── -->
+      <div class="db-map-card">
+        <div class="db-map-card__head">
+          <h4 class="db-map-card__title">Distribución en Vivo — Flota</h4>
+          <span class="db-map-card__demo-badge">&#128250; Modo Demo</span>
+        </div>
+
+        <div class="db-map">
+          <!-- Stylized map grid -->
+          <div class="db-map__grid-overlay"></div>
+
+          <!-- SVG Routes -->
+          <svg class="db-map__svg" viewBox="0 0 900 360" preserveAspectRatio="xMidYMid meet">
+            <!-- Route A — horizontal west to east -->
+            <line x1="60" y1="120" x2="840" y2="120" stroke="#fd8b00" stroke-width="2.5" stroke-dasharray="10 6" opacity="0.7"/>
+            <circle cx="60"  cy="120" r="6" fill="#fd8b00"/>
+            <circle cx="840" cy="120" r="6" fill="#fd8b00"/>
+            <text x="68"  y="112" fill="#fd8b00" font-size="11" font-family="Inter,sans-serif" font-weight="700">A · Terminal Norte</text>
+            <text x="700" y="112" fill="#fd8b00" font-size="11" font-family="Inter,sans-serif" font-weight="700">Destino A</text>
+
+            <!-- Route B — diagonal -->
+            <line x1="100" y1="300" x2="800" y2="60" stroke="#8192a7" stroke-width="2" stroke-dasharray="8 5" opacity="0.6"/>
+            <circle cx="100" cy="300" r="6" fill="#8192a7"/>
+            <circle cx="800" cy="60"  r="6" fill="#8192a7"/>
+            <text x="108" y="296" fill="#b7c8de" font-size="11" font-family="Inter,sans-serif" font-weight="700">B · Terminal Sur</text>
+            <text x="700" y="58"  fill="#b7c8de" font-size="11" font-family="Inter,sans-serif" font-weight="700">Destino B</text>
+
+            <!-- Route C — vertical south to north -->
+            <line x1="450" y1="320" x2="450" y2="30" stroke="#3aa186" stroke-width="2" stroke-dasharray="8 5" opacity="0.6"/>
+            <circle cx="450" cy="320" r="6" fill="#3aa186"/>
+            <circle cx="450" cy="30"  r="6" fill="#3aa186"/>
+            <text x="458" y="318" fill="#3aa186" font-size="11" font-family="Inter,sans-serif" font-weight="700">C · Terminal Este</text>
+            <text x="458" y="28"  fill="#3aa186" font-size="11" font-family="Inter,sans-serif" font-weight="700">Destino C</text>
+
+            <!-- Vehicle markers -->
+            <% fleetList.slice(0,6).forEach((v,i) => {
+              const positions = [[200,118],[380,118],[600,118],[240,210],[580,175],[450,160]];
+              const [mx,my] = positions[i] || [300+i*60, 180];
+              const col = v.status==='activo' ? '#fd8b00' : v.status==='mantenimiento' ? '#ba1a1a' : '#8192a7';
+            %>
+              <circle cx="<%= mx %>" cy="<%= my %>" r="10" fill="<%= col %>" stroke="white" stroke-width="2.5"/>
+              <text x="<%= mx %>" y="<%= my+4 %>" text-anchor="middle" fill="white" font-size="8" font-family="Inter,sans-serif" font-weight="700">&#128663;</text>
+              <text x="<%= mx %>" y="<%= my+20 %>" text-anchor="middle" fill="white" font-size="9" font-family="Inter,sans-serif" font-weight="600" opacity="0.9"><%= v.plate %></text>
+            <% }) %>
+          </svg>
+
+          <!-- Stats overlay -->
+          <div class="db-map__overlay">
+            <span class="db-map__overlay-dot"></span>
+            <div>
+              <p class="db-map__overlay-count"><%= kpi.active %> Unidades Activas</p>
+              <p class="db-map__overlay-sub">3 rutas en operación</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo notice -->
+        <div class="db-map__notice">
+          <strong>&#8505; Modo Demo:</strong>
+          El mapa muestra las rutas predefinidas (A, B, C) y la posición simulada de los vehículos.
+          En producción, la ubicación en tiempo real se obtendría via GPS asociado al número telefónico registrado por vehículo,
+          y las desviaciones de ruta se detectarían automáticamente al salirse del corredor de la ruta asignada en la inspección.
+        </div>
+      </div>
+
+    </div><!-- /content -->
   </main>
 </body>
 </html>

@@ -50,11 +50,11 @@ exports.create = (req, res) => {
 exports.store = async (req, res, next) => {
   try {
     const { plate, brand, model, year, type, status, fuel_capacity, insurance_expiry,
-            trigger_type, trigger_value, program_id } = req.body;
+            phone, trigger_type, trigger_value, program_id } = req.body;
 
     const [result] = await db.query(
-      'INSERT INTO vehicles (plate, brand, model, year, type, status, fuel_capacity, insurance_expiry) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [plate, brand, model, year, type, status, fuel_capacity, insurance_expiry]
+      'INSERT INTO vehicles (plate, brand, model, year, type, status, fuel_capacity, insurance_expiry, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [plate, brand, model, year, type, status, fuel_capacity, insurance_expiry, phone || null]
     );
 
     if (trigger_type && trigger_value && program_id) {
@@ -91,11 +91,11 @@ exports.edit = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const { plate, brand, model, year, type, status, fuel_capacity, insurance_expiry,
-            trigger_type, trigger_value, program_id } = req.body;
+            phone, trigger_type, trigger_value, program_id } = req.body;
 
     await db.query(
-      'UPDATE vehicles SET plate=?, brand=?, model=?, year=?, type=?, status=?, fuel_capacity=?, insurance_expiry=? WHERE id=?',
-      [plate, brand, model, year, type, status, fuel_capacity, insurance_expiry, req.params.id]
+      'UPDATE vehicles SET plate=?, brand=?, model=?, year=?, type=?, status=?, fuel_capacity=?, insurance_expiry=?, phone=? WHERE id=?',
+      [plate, brand, model, year, type, status, fuel_capacity, insurance_expiry, phone || null, req.params.id]
     );
 
     if (trigger_type && trigger_value && program_id) {
@@ -109,6 +109,48 @@ exports.update = async (req, res, next) => {
     }
 
     res.redirect('/flota');
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.historial = async (req, res, next) => {
+  try {
+    const id    = req.params.id;
+    const LIMIT = 3;
+    const pageInsp  = Math.max(1, parseInt(req.query.pageInsp)  || 1);
+    const pageMaint = Math.max(1, parseInt(req.query.pageMaint) || 1);
+
+    const [vRows] = await db.query('SELECT * FROM vehicles WHERE id = ?', [id]);
+    if (!vRows.length) return res.redirect('/flota');
+    const vehicle = vRows[0];
+
+    const [[cInsp], [cMaint], [inspections], [maintenances]] = await Promise.all([
+      db.query('SELECT COUNT(*) AS total FROM inspections  WHERE vehicle_id = ?', [id]),
+      db.query('SELECT COUNT(*) AS total FROM maintenance  WHERE vehicle_id = ?', [id]),
+      db.query(
+        `SELECT id, driver_name, engine, lights, tires, safety, result,
+                engine_rating, lights_rating, tires_rating, safety_rating,
+                notes, photos, created_at
+         FROM inspections WHERE vehicle_id = ?
+         ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+        [id, LIMIT, (pageInsp - 1) * LIMIT]
+      ),
+      db.query(
+        `SELECT * FROM maintenance WHERE vehicle_id = ?
+         ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+        [id, LIMIT, (pageMaint - 1) * LIMIT]
+      ),
+    ]);
+
+    res.render('fleet/historial', {
+      title: `Historial — ${vehicle.plate}`,
+      vehicle,
+      inspections,
+      maintenances,
+      pageInsp,   pagesInsp:  Math.ceil(cInsp[0].total  / LIMIT), totalInsp:  cInsp[0].total,
+      pageMaint,  pagesMaint: Math.ceil(cMaint[0].total / LIMIT), totalMaint: cMaint[0].total,
+    });
   } catch (err) {
     next(err);
   }

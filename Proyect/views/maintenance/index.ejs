@@ -6,50 +6,290 @@
   <main class="main">
     <%- include('../partials/topbar') %>
     <div class="content">
+      <%
+        /* ── Calendar helpers ────────────────────────────────── */
+        const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                             'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const DAY_ABBR    = ['DO','LU','MA','MI','JU','VI','SA'];
 
-      <div class="toolbar">
-        <span></span>
-        <a href="/mantenimiento/nuevo" class="btn btn--action">+ Nuevo Registro</a>
+        const firstWeekDay  = new Date(calYear, calMonth, 1).getDay();      // 0=Sun
+        const daysInMonth   = new Date(calYear, calMonth + 1, 0).getDate();
+        const prevMonthDays = new Date(calYear, calMonth, 0).getDate();
+
+        const prevDate  = new Date(calYear, calMonth - 1, 1);
+        const nextDate  = new Date(calYear, calMonth + 1, 1);
+        const prevMonth = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+        const nextMonth = `${nextDate.getFullYear()}-${String(nextDate.getMonth()+1).padStart(2,'0')}`;
+
+        const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+        // Build day cells array
+        const cells = [];
+        for (let i = firstWeekDay - 1; i >= 0; i--)
+          cells.push({ day: prevMonthDays - i, current: false, key: null });
+        for (let d = 1; d <= daysInMonth; d++) {
+          const key = `${calYear}-${String(calMonthNum).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          cells.push({ day: d, current: true, key });
+        }
+        let nd = 1;
+        while (cells.length % 7 !== 0 || cells.length < 35)
+          cells.push({ day: nd++, current: false, key: null });
+
+        /* ── Status labels ───────────────────────────────────── */
+        const STATUS_LABEL = { pendiente:'Pendiente', en_progreso:'En Proceso', completado:'Completado' };
+        const TYPE_LABEL   = { preventivo:'Preventivo', correctivo:'Correctivo', predictivo:'Predictivo' };
+      %>
+
+      <!-- ── KPI Row ─────────────────────────────────────────── -->
+      <div class="maint-kpi-grid">
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-card__head">
+            <span class="maint-kpi-card__label">Gasto Total (Mes)</span>
+            <span class="maint-kpi-card__icon">&#128178;</span>
+          </div>
+          <p class="maint-kpi-card__value">$<%= kpi.monthly_cost %></p>
+        </div>
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-card__head">
+            <span class="maint-kpi-card__label">Próximos 7 días</span>
+            <span class="maint-kpi-card__icon" style="color:var(--orange)">&#128197;</span>
+          </div>
+          <p class="maint-kpi-card__value"><%= kpi.upcoming_7 %></p>
+          <p class="maint-kpi-card__sub">Mantenimientos pendientes</p>
+        </div>
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-card__head">
+            <span class="maint-kpi-card__label">Vehículos en Taller</span>
+            <span class="maint-kpi-card__icon" style="color:var(--fail-text)">&#128663;</span>
+          </div>
+          <p class="maint-kpi-card__value"><%= kpi.in_shop %></p>
+        </div>
+        <div class="maint-kpi-card">
+          <div class="maint-kpi-card__head">
+            <span class="maint-kpi-card__label">Salud de Flota</span>
+            <span class="maint-kpi-card__icon" style="color:var(--pass-text)">&#10003;</span>
+          </div>
+          <p class="maint-kpi-card__value"><%= kpi.fleet_health %>%</p>
+          <div class="maint-health-bar">
+            <div class="maint-health-bar__fill" style="width:<%= kpi.fleet_health %>%"></div>
+          </div>
+        </div>
       </div>
 
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Placa</th>
-            <th>Vehículo</th>
-            <th>Tipo</th>
-            <th>Descripción</th>
-            <th>Costo</th>
-            <th>Estado</th>
-            <th>Fecha Programada</th>
-            <th>Completado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (records.length === 0) { %>
-            <tr><td colspan="9" class="table__empty">Sin registros de mantenimiento</td></tr>
-          <% } else { %>
-            <% records.forEach(r => { %>
-              <tr>
-                <td class="table__mono"><%= r.plate %></td>
-                <td><%= r.brand %> <%= r.model %></td>
-                <td><%= r.type %></td>
-                <td><%= r.description %></td>
-                <td class="table__mono">$<%= Number(r.cost).toLocaleString('es-ES') %></td>
-                <td><span class="badge badge--<%= r.status %>"><%= r.status %></span></td>
-                <td class="table__mono"><%= r.scheduled_date ? new Date(r.scheduled_date).toLocaleDateString('es-ES') : '—' %></td>
-                <td class="table__mono"><%= r.completed_date ? new Date(r.completed_date).toLocaleDateString('es-ES') : '—' %></td>
-                <td class="table__actions">
-                  <a href="/mantenimiento/<%= r.id %>/editar" class="btn btn--ghost btn--sm">Editar</a>
-                </td>
-              </tr>
-            <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+      <!-- ── Main 12-col grid ────────────────────────────────── -->
+      <div class="maint-grid">
 
-    </div>
+        <!-- LEFT 8/12 — History table ───────────────────────── -->
+        <div class="maint-left">
+          <div class="maint-left__head">
+            <h2 class="maint-left__title">Historial de Mantenimientos</h2>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Vehículo</th>
+                <th>Servicio</th>
+                <th>Costo</th>
+                <th>Estado</th>
+                <th style="text-align:right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (records.length === 0) { %>
+                <tr><td colspan="6" class="table__empty">Sin registros de mantenimiento</td></tr>
+              <% } else { records.forEach(r => {
+                   const isLocked = r.is_programmed === 1
+                     && r.scheduled_date
+                     && new Date(r.scheduled_date) > today;
+              %>
+                <tr class="<%= r.is_programmed ? 'maint-row--programmed' : '' %>">
+                  <td class="table__mono maint-date-cell">
+                    <%= r.scheduled_date
+                        ? new Date(r.scheduled_date).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})
+                        : '—' %>
+                  </td>
+                  <td>
+                    <div class="maint-vehicle-plate"><%= r.plate %></div>
+                    <div class="maint-vehicle-name"><%= r.brand %> <%= r.model %></div>
+                  </td>
+                  <td>
+                    <div class="maint-desc">
+                      <% if (r.is_programmed) { %>
+                        <span class="maint-lock-icon" title="Mantenimiento programado">&#128274;</span>
+                      <% } %>
+                      <%= r.description %>
+                    </div>
+                    <div class="maint-type-label"><%= TYPE_LABEL[r.type] || r.type %></div>
+                  </td>
+                  <td class="table__mono">
+                    $<%= Number(r.cost).toLocaleString('es-ES',{minimumFractionDigits:2}) %>
+                  </td>
+                  <td>
+                    <span class="badge badge--<%= r.status %>">
+                      <%= STATUS_LABEL[r.status] || r.status %>
+                    </span>
+                  </td>
+                  <td style="text-align:right">
+                    <% if (isLocked) { %>
+                      <span class="maint-locked-btn" title="Disponible el <%= new Date(r.scheduled_date).toLocaleDateString('es-ES') %>">
+                        &#128274; Bloqueado
+                      </span>
+                    <% } else { %>
+                      <a href="/mantenimiento/<%= r.id %>/editar" class="btn btn--ghost btn--sm">Editar</a>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RIGHT 4/12 ────────────────────────────────────────── -->
+        <div class="maint-right">
+
+          <!-- Nueva Orden card -->
+          <div class="maint-action-card">
+            <div class="maint-action-card__body">
+              <h3 class="maint-action-card__title">Nueva Orden</h3>
+              <p class="maint-action-card__desc">Registre un servicio de mantenimiento preventivo o correctivo de forma inmediata.</p>
+              <a href="/mantenimiento/nuevo" class="maint-action-card__btn">+ Registrar Servicio</a>
+            </div>
+            <div class="maint-action-card__deco">&#128295;</div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="maint-cal">
+            <div class="maint-cal__head">
+              <span class="maint-cal__title">Calendario Preventivo</span>
+              <div class="maint-cal__nav">
+                <a href="/mantenimiento?month=<%= prevMonth %>" class="maint-cal__nav-btn">&#8249;</a>
+                <a href="/mantenimiento?month=<%= nextMonth %>" class="maint-cal__nav-btn">&#8250;</a>
+              </div>
+            </div>
+
+            <div class="maint-cal__body">
+              <p class="maint-cal__month-label"><%= MONTH_NAMES[calMonth] %> <%= calYear %></p>
+
+              <div class="maint-cal__dow-row">
+                <% DAY_ABBR.forEach(d => { %><span class="maint-cal__dow"><%= d %></span><% }) %>
+              </div>
+
+              <div class="maint-cal__grid" id="calGrid">
+                <% cells.forEach(cell => {
+                  const events = cell.key ? (calendarEvents[cell.key] || []) : [];
+                  const isToday   = cell.key === todayKey;
+                  const hasEvents = events.length > 0;
+                  const hasProg   = events.some(e => e.is_programmed);
+                  const hasManual = events.some(e => !e.is_programmed);
+                %>
+                  <div class="maint-cal__day
+                    <%= !cell.current      ? 'maint-cal__day--other'   : '' %>
+                    <%= isToday            ? 'maint-cal__day--today'   : '' %>
+                    <%= hasEvents          ? 'maint-cal__day--event'   : '' %>"
+                    <% if (cell.key && hasEvents) { %>
+                      onclick="showDayEvents('<%= cell.key %>',
+                        '<%= cell.day %> <%= MONTH_NAMES[calMonth] %>')"
+                      style="cursor:pointer"
+                    <% } %>>
+                    <span class="maint-cal__day-num"><%= cell.day %></span>
+                    <div class="maint-cal__dots">
+                      <% if (hasProg)   { %><span class="maint-cal__dot maint-cal__dot--prog"></span><% } %>
+                      <% if (hasManual) { %><span class="maint-cal__dot maint-cal__dot--manual"></span><% } %>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+
+              <!-- Legend -->
+              <div class="maint-cal__legend">
+                <span class="maint-cal__dot maint-cal__dot--prog"></span><span>Programado</span>
+                <span class="maint-cal__dot maint-cal__dot--manual"></span><span>Manual</span>
+              </div>
+
+              <!-- Events panel -->
+              <div class="maint-cal__events" id="calEvents">
+                <p class="maint-cal__events-title" id="calEventsTitle">
+                  Hoy — <%= today.toLocaleDateString('es-ES',{day:'2-digit',month:'long'}) %>
+                </p>
+                <%
+                  const todayEvents = calendarEvents[todayKey] || [];
+                %>
+                <% if (todayEvents.length === 0) { %>
+                  <p class="maint-cal__events-empty">Sin eventos hoy</p>
+                <% } else { %>
+                  <% todayEvents.forEach(ev => { %>
+                    <div class="maint-cal__event-item">
+                      <div class="maint-cal__event-bar
+                        <%= ev.is_programmed ? 'maint-cal__event-bar--prog' : 'maint-cal__event-bar--manual' %>">
+                      </div>
+                      <div>
+                        <p class="maint-cal__event-desc"><%= ev.description %></p>
+                        <p class="maint-cal__event-meta"><%= ev.plate %> &middot;
+                          <span class="badge badge--<%= ev.status %>" style="font-size:9px;padding:1px 6px">
+                            <%= STATUS_LABEL[ev.status] %>
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  <% }) %>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /maint-right -->
+      </div><!-- /maint-grid -->
+    </div><!-- /content -->
   </main>
+
+  <!-- Calendar events data for JS -->
+  <script>
+  const CAL_EVENTS = <%- JSON.stringify(calendarEvents) %>;
+  const STATUS_LABEL = { pendiente:'Pendiente', en_progreso:'En Proceso', completado:'Completado' };
+
+  function showDayEvents(key, label) {
+    const events = CAL_EVENTS[key] || [];
+    const title  = document.getElementById('calEventsTitle');
+    const panel  = document.getElementById('calEvents');
+
+    title.textContent = label;
+
+    let html = '';
+    if (!events.length) {
+      html = '<p class="maint-cal__events-empty">Sin eventos</p>';
+    } else {
+      events.forEach(ev => {
+        const barClass = ev.is_programmed ? 'maint-cal__event-bar--prog' : 'maint-cal__event-bar--manual';
+        const stBadge  = `<span class="badge badge--${ev.status}" style="font-size:9px;padding:1px 6px">${STATUS_LABEL[ev.status]||ev.status}</span>`;
+        html += `<div class="maint-cal__event-item">
+          <div class="maint-cal__event-bar ${barClass}"></div>
+          <div>
+            <p class="maint-cal__event-desc">${ev.description}</p>
+            <p class="maint-cal__event-meta">${ev.plate} &middot; ${stBadge}</p>
+          </div>
+        </div>`;
+      });
+    }
+    panel.querySelector('.maint-cal__events-title') || (panel.innerHTML = '');
+    // Replace everything after the title
+    title.insertAdjacentHTML('afterend', html);
+    // Remove old event items
+    panel.querySelectorAll('.maint-cal__event-item, .maint-cal__events-empty').forEach(el => {
+      if (el.previousSibling !== title && el !== title) el.remove();
+    });
+    // Rebuild properly
+    panel.innerHTML = `<p class="maint-cal__events-title">${label}</p>${html}`;
+
+    // Highlight selected day
+    document.querySelectorAll('.maint-cal__day--selected')
+      .forEach(d => d.classList.remove('maint-cal__day--selected'));
+    document.querySelectorAll('.maint-cal__day--event').forEach(d => {
+      if (d.getAttribute('onclick') && d.getAttribute('onclick').includes(`'${key}'`))
+        d.classList.add('maint-cal__day--selected');
+    });
+  }
+  </script>
 </body>
 </html>

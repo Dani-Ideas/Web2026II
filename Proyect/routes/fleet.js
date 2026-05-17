@@ -9,6 +9,7 @@ router.post('/', fleetController.store);
 // Must come before /:id to avoid param collision
 router.post('/horario/:id/avanzar', fleetController.advanceSchedule);
 
+router.get('/:id/historial', fleetController.historial);
 router.get('/:id/editar', fleetController.edit);
 router.post('/:id', fleetController.update);
 router.post('/:id/eliminar', fleetController.destroy);
