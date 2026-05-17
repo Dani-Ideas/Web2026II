@@ -12,15 +12,19 @@ Este documento está dirigido a la persona que tomará este proyecto para darle 
 4. [Cómo agregar una nueva página o módulo](#4-cómo-agregar-una-nueva-página-o-módulo)
 5. [Cómo modificar el formulario de inspección](#5-cómo-modificar-el-formulario-de-inspección)
 6. [Cómo funciona la programación de mantenimiento periódico](#6-cómo-funciona-la-programación-de-mantenimiento-periódico)
-7. [Cómo funciona la subida de fotos](#7-cómo-funciona-la-subida-de-fotos)
-8. [Cómo funciona el mapa de daños y la firma digital](#8-cómo-funciona-el-mapa-de-daños-y-la-firma-digital)
-9. [Cómo modificar el sistema de diseño (colores, tipografía)](#9-cómo-modificar-el-sistema-de-diseño-colores-tipografía)
-10. [Cómo agregar un nuevo tipo de vehículo con su imagen](#10-cómo-agregar-un-nuevo-tipo-de-vehículo-con-su-imagen)
-11. [Migraciones de base de datos](#11-migraciones-de-base-de-datos)
-12. [Docker — producción y operación](#12-docker--producción-y-operación)
-13. [Escalabilidad — qué cambiar cuando crezca](#13-escalabilidad--qué-cambiar-cuando-crezca)
-14. [Errores comunes y cómo resolverlos](#14-errores-comunes-y-cómo-resolverlos)
-15. [Convenciones de código del proyecto](#15-convenciones-de-código-del-proyecto)
+7. [Cómo funciona el calendario de mantenimiento](#7-cómo-funciona-el-calendario-de-mantenimiento)
+8. [Cómo funciona el historial de vehículo (paginación paralela)](#8-cómo-funciona-el-historial-de-vehículo-paginación-paralela)
+9. [Cómo funciona el dashboard](#9-cómo-funciona-el-dashboard)
+10. [Cómo agregar más rutas al selector de ruta](#10-cómo-agregar-más-rutas-al-selector-de-ruta)
+11. [Cómo funciona la subida de fotos](#11-cómo-funciona-la-subida-de-fotos)
+12. [Cómo funciona el mapa de daños y la firma digital](#12-cómo-funciona-el-mapa-de-daños-y-la-firma-digital)
+13. [Cómo modificar el sistema de diseño (colores, tipografía)](#13-cómo-modificar-el-sistema-de-diseño-colores-tipografía)
+14. [Cómo agregar un nuevo tipo de vehículo con su imagen](#14-cómo-agregar-un-nuevo-tipo-de-vehículo-con-su-imagen)
+15. [Migraciones de base de datos](#15-migraciones-de-base-de-datos)
+16. [Docker — producción y operación](#16-docker--producción-y-operación)
+17. [Escalabilidad — qué cambiar cuando crezca](#17-escalabilidad--qué-cambiar-cuando-crezca)
+18. [Errores comunes y cómo resolverlos](#18-errores-comunes-y-cómo-resolverlos)
+19. [Convenciones de código del proyecto](#19-convenciones-de-código-del-proyecto)
 
 ---
 
@@ -42,42 +46,48 @@ Proyect/
 │
 ├── routes/
 │   ├── dashboard.js        ← Rutas de /
-│   ├── fleet.js            ← Rutas de /flota
+│   ├── fleet.js            ← Rutas de /flota (incluye /:id/historial)
 │   ├── inspections.js      ← Rutas de /inspecciones
 │   └── maintenance.js      ← Rutas de /mantenimiento
 │
 ├── controllers/
-│   ├── dashboardController.js
-│   ├── fleetController.js
-│   ├── inspectionController.js
-│   └── maintenanceController.js
+│   ├── dashboardController.js   ← Dashboard con 6 queries paralelas y KPIs
+│   ├── fleetController.js       ← CRUD vehículos + historial + avance de secuencia
+│   ├── inspectionController.js  ← CRUD inspecciones con ruta y tipo de vehículo
+│   └── maintenanceController.js ← CRUD mantenimiento + sync automático + bloqueo
 │
 ├── views/                  ← Plantillas EJS (HTML con código JS embebido)
 │   ├── partials/           ← Fragmentos reutilizables
 │   │   ├── head.ejs        ← <head> con CSS y fuentes
 │   │   ├── sidebar.ejs     ← Menú lateral
 │   │   └── topbar.ejs      ← Barra superior con título
-│   ├── dashboard/index.ejs
+│   ├── dashboard/index.ejs ← Dashboard con KPIs, gráfica, alertas y mapa SVG
 │   ├── fleet/
-│   │   ├── index.ejs       ← Lista de vehículos
-│   │   └── form.ejs        ← Crear / editar vehículo
+│   │   ├── index.ejs       ← Lista de vehículos con botón Historial
+│   │   ├── form.ejs        ← Crear / editar vehículo (incluye campo phone)
+│   │   └── historial.ejs   ← Historial paginado de inspecciones y mantenimientos
 │   ├── inspections/
-│   │   ├── form.ejs        ← Formulario de inspección (carrusel)
-│   │   ├── index.ejs       ← Historial
-│   │   └── show.ejs        ← Detalle de una inspección
+│   │   ├── form.ejs        ← Formulario carrusel (incluye selector de ruta)
+│   │   ├── index.ejs       ← Historial global de inspecciones
+│   │   └── show.ejs        ← Detalle con overlay de daños sobre imagen del vehículo
 │   ├── maintenance/
-│   │   ├── index.ejs
-│   │   └── form.ejs
+│   │   ├── index.ejs       ← Lista + KPIs + calendario con eventos
+│   │   └── form.ejs        ← Crear / editar (con aviso de bloqueo si es programado)
 │   └── error.ejs           ← Página de error genérica
 │
 ├── public/                 ← Archivos estáticos servidos directamente al browser
 │   ├── css/style.css       ← TODA la hoja de estilos del proyecto
 │   ├── js/signature.js     ← (legado, la lógica actual está inline en form.ejs)
-│   ├── images/             ← Imágenes de tipos de vehículo
+│   ├── images/             ← Imágenes de tipos de vehículo (PNG transparente)
 │   └── uploads/            ← Fotos subidas por usuarios
 │
-└── database/
-    └── schema.sql          ← Definición completa de tablas
+├── database/
+│   └── schema.sql          ← Definición completa de tablas
+│
+└── docs/
+    ├── README.usuario.md       ← Guía para el usuario final
+    ├── README.tecnico.md       ← Referencia para DevOps/sysadmin
+    └── README.mantenimiento.md ← Este archivo
 ```
 
 ---
@@ -125,7 +135,7 @@ EJS es un sistema de plantillas. Es HTML normal, pero puede incluir bloques de J
 
 ### ¿Qué es el pool de conexiones MySQL?
 
-`config/db.js` crea un **pool** de conexiones. Esto significa que en vez de abrir y cerrar una conexión por cada query, mantiene un grupo de conexiones listas. Los controllers simplemente hacen:
+`config/db.js` crea un **pool** de conexiones. Los controllers hacen:
 
 ```javascript
 const [rows] = await db.query('SELECT * FROM vehicles WHERE id = ?', [id]);
@@ -156,26 +166,15 @@ EXIT;
 Ejemplo: agregar `odometer` (kilometraje) a `vehicles`:
 
 **Paso 1 — Aplicar en la BD corriendo:**
-```sql
--- Ejecutar en MySQL
-ALTER TABLE vehicles ADD COLUMN odometer INT DEFAULT NULL COMMENT 'Kilometraje actual';
-```
-
-Con Docker:
 ```bash
 docker exec -i proyect-db-1 mysql -ufleetops -psecret fleetops_db -e \
   "ALTER TABLE vehicles ADD COLUMN odometer INT DEFAULT NULL;"
 ```
 
-**Paso 2 — Actualizar `database/schema.sql`** para que las instalaciones futuras incluyan la columna:
-```sql
--- Dentro de CREATE TABLE vehicles, agregar:
-odometer INT DEFAULT NULL,
-```
+**Paso 2 — Actualizar `database/schema.sql`** para que las instalaciones futuras incluyan la columna.
 
-**Paso 3 — Usar la columna en el controller:**
+**Paso 3 — Usar la columna en el controller** (`fleetController.js`):
 ```javascript
-// En fleetController.js, función store:
 const { plate, brand, ..., odometer } = req.body;
 await db.query(
   'INSERT INTO vehicles (plate, brand, ..., odometer) VALUES (?, ?, ..., ?)',
@@ -183,7 +182,7 @@ await db.query(
 );
 ```
 
-**Paso 4 — Mostrar en la vista EJS:**
+**Paso 4 — Mostrar en la vista EJS** (`views/fleet/form.ejs`):
 ```ejs
 <div class="form__group">
   <label class="form__label">Kilometraje actual</label>
@@ -191,6 +190,8 @@ await db.query(
     value="<%= vehicle ? vehicle.odometer : '' %>" />
 </div>
 ```
+
+> **Nota:** MySQL 8.0 no soporta `IF NOT EXISTS` en `ALTER TABLE ADD COLUMN`. Si el script puede correr dos veces, verificar primero con `SHOW COLUMNS FROM vehicles LIKE 'odometer'`.
 
 ---
 
@@ -201,7 +202,6 @@ Supongamos que queremos agregar un módulo de **Conductores** (`/conductores`).
 ### Paso 1 — Crear la tabla en la BD
 
 ```sql
--- En database/schema.sql, agregar:
 CREATE TABLE IF NOT EXISTS drivers (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   name       VARCHAR(120) NOT NULL,
@@ -212,33 +212,25 @@ CREATE TABLE IF NOT EXISTS drivers (
 );
 ```
 
-Aplicar en la BD corriendo:
-```bash
-docker exec -i proyect-db-1 mysql -ufleetops -psecret fleetops_db < database/schema.sql
-```
-(Si la tabla ya existe, el `IF NOT EXISTS` evita error.)
+### Paso 2 — Crear el archivo de rutas (`routes/drivers.js`)
 
-### Paso 2 — Crear el archivo de rutas
-
-Crear `routes/drivers.js`:
 ```javascript
 const express = require('express');
 const router  = express.Router();
 const ctrl    = require('../controllers/driverController');
 
-router.get('/',            ctrl.index);
-router.get('/nuevo',       ctrl.create);
-router.post('/',           ctrl.store);
-router.get('/:id/editar',  ctrl.edit);
-router.post('/:id',        ctrl.update);
+router.get('/',              ctrl.index);
+router.get('/nuevo',         ctrl.create);
+router.post('/',             ctrl.store);
+router.get('/:id/editar',    ctrl.edit);
+router.post('/:id',          ctrl.update);
 router.post('/:id/eliminar', ctrl.destroy);
 
 module.exports = router;
 ```
 
-### Paso 3 — Crear el controller
+### Paso 3 — Crear el controller (`controllers/driverController.js`)
 
-Crear `controllers/driverController.js`:
 ```javascript
 const db = require('../config/db');
 
@@ -248,50 +240,24 @@ exports.index = async (req, res, next) => {
     res.render('drivers/index', { title: 'Conductores', drivers });
   } catch (err) { next(err); }
 };
-
-exports.create = (req, res) => {
-  res.render('drivers/form', { title: 'Nuevo Conductor', driver: null });
-};
-
-exports.store = async (req, res, next) => {
-  try {
-    const { name, license, phone, status } = req.body;
-    await db.query(
-      'INSERT INTO drivers (name, license, phone, status) VALUES (?, ?, ?, ?)',
-      [name, license, phone, status]
-    );
-    res.redirect('/conductores');
-  } catch (err) { next(err); }
-};
-
 // edit, update, destroy siguen el mismo patrón que fleetController
 ```
 
 ### Paso 4 — Registrar la ruta en app.js
 
-En `app.js`, agregar antes del middleware de 404:
 ```javascript
 const driverRoutes = require('./routes/drivers');
 app.use('/conductores', driverRoutes);
 ```
 
-### Paso 5 — Crear las vistas
+### Paso 5 — Crear las vistas y agregar al menú lateral
 
-Crear el directorio `views/drivers/` y los archivos `index.ejs` y `form.ejs`. Copiar la estructura de `views/fleet/index.ejs` como punto de partida y adaptar los campos.
-
-### Paso 6 — Agregar al menú lateral
-
-En `views/partials/sidebar.ejs`, agregar un nuevo enlace:
+Crear `views/drivers/index.ejs` y `form.ejs`. En `views/partials/sidebar.ejs`:
 ```ejs
 <a href="/conductores" class="sidebar__link
-  <%= typeof currentPage !== 'undefined' && currentPage === 'drivers' ? 'sidebar__link--active' : '' %>">
-  <span class="sidebar__icon">👤</span> Conductores
+  <%= currentPage === 'drivers' ? 'sidebar__link--active' : '' %>">
+  Conductores
 </a>
-```
-
-Y en cada vista del nuevo módulo, pasar `currentPage: 'drivers'` al render:
-```javascript
-res.render('drivers/index', { title: 'Conductores', drivers, currentPage: 'drivers' });
 ```
 
 ---
@@ -302,57 +268,38 @@ El formulario está en `views/inspections/form.ejs`. Es el archivo más complejo
 
 ### Estructura del carrusel
 
-El carrusel funciona con CSS `transform: translateX`. Cada slide ocupa el 100% del ancho del contenedor. El track (contenedor interno) se mueve horizontalmente:
-
 ```
 car-wrap (overflow: hidden)
   └── car-track (display: flex; width: 400%)
-        ├── car-slide 1 (min-width: 100%)
-        ├── car-slide 2 (min-width: 100%)
-        ├── car-slide 3 (min-width: 100%)
-        └── car-slide 4 (min-width: 100%)
+        ├── car-slide 1  Motor        (min-width: 100%)
+        ├── car-slide 2  Iluminación  (min-width: 100%)
+        ├── car-slide 3  Neumáticos   (min-width: 100%)
+        └── car-slide 4  Seguridad    (min-width: 100%)
 
 Al ir al slide 2: car-track.style.transform = 'translateX(-100%)'
-Al ir al slide 3: car-track.style.transform = 'translateX(-200%)'
 ```
 
 ### Agregar una nueva categoría al carrusel
 
-1. **En el HTML del carrusel**, copiar un bloque `<div class="car-slide">` y modificar:
-   - El gradiente del hero (cambiar colores en `style="background:..."`).
-   - El ícono emoji.
-   - El número de categoría (`Categoría 5 / 5`).
-   - El título.
-   - Los ítems del checklist dentro de `car-slide__body`.
-   - El ID de estrellas (`id="starsNew"`) y el nombre del campo (`name="new_rating"`).
-   - El ID del botón siguiente (`id="nextBtn4"`).
+1. Copiar un bloque `<div class="car-slide">` y modificar gradiente, ícono, título, ítems del checklist, ID de estrellas (`name="new_rating"`) y botón siguiente.
+2. Agregar un dot: `<button type="button" class="car-dot" onclick="goToSlide(4)"></button>`
+3. Actualizar `TOTAL = 5` en el bloque `<script>`.
+4. Agregar columna en BD: `ALTER TABLE inspections ADD COLUMN new_rating TINYINT DEFAULT NULL;`
+5. Actualizar `store` en `inspectionController.js` para recibir y guardar `new_rating`.
 
-2. **Agregar un punto más en los dots:**
-```html
-<button type="button" class="car-dot" onclick="goToSlide(4)"></button>
-```
+### Selector de ruta
 
-3. **Actualizar `TOTAL = 5`** en el bloque `<script>`.
+El selector de ruta está implementado como un grupo de radio buttons estilizados (`class="db-route-opt"`). Las rutas están hardcodeadas en `form.ejs` como un array inline:
 
-4. **Agregar la columna en la base de datos:**
-```sql
-ALTER TABLE inspections ADD COLUMN new_rating TINYINT DEFAULT NULL;
-```
-
-5. **Actualizar el controller** `store` para recibir y guardar `new_rating`.
-
-6. **Agregar la lógica de derivación** en `ratingToStatus` si aplica.
-
-### Agregar un ítem nuevo a una categoría existente
-
-Solo agregar un nuevo `<label class="chk-row">` dentro del `car-slide__body` correspondiente. Los checkboxes se envían como array (`name="engine_items[]"`), actualmente no se almacenan en BD, solo sirven de guía visual para llegar a la calificación de estrellas.
-
-Si se quiere guardarlos: agregar una columna `engine_items TEXT` en inspections, y en el controller:
 ```javascript
-const engineItems = Array.isArray(req.body['engine_items[]'])
-  ? req.body['engine_items[]'].join(',')
-  : req.body['engine_items[]'] || '';
+[
+  { val:'A', name:'Ruta A', desc:'Terminal Norte → Destino A', color:'var(--orange)' },
+  { val:'B', name:'Ruta B', desc:'Terminal Sur → Destino B',   color:'#8192a7' },
+  { val:'C', name:'Ruta C', desc:'Terminal Este → Destino C',  color:'var(--pass-text)' },
+]
 ```
+
+El valor seleccionado se envía como `route` en el POST y se guarda en `inspections.route`. Ver sección 10 para agregar más rutas.
 
 ---
 
@@ -360,7 +307,11 @@ const engineItems = Array.isArray(req.body['engine_items[]'])
 
 ### Las tres secuencias predefinidas
 
-En `controllers/fleetController.js`, al tope del archivo:
+La constante `PROGRAMS` está **duplicada** en dos archivos:
+- `controllers/fleetController.js` — para mostrar las tarjetas en el form de vehículo.
+- `controllers/maintenanceController.js` — para el sync automático y el avance de secuencia.
+
+Si se agrega una nueva secuencia, hay que actualizarla en **ambos** archivos.
 
 ```javascript
 const PROGRAMS = {
@@ -370,47 +321,202 @@ const PROGRAMS = {
 };
 ```
 
-La tabla `maintenance_schedules` almacena `current_step` (qué posición en el array es el próximo mantenimiento a realizar).
-
-### Ciclo de vida de un paso
+### Ciclo de vida automático (trigger_type = 'time')
 
 ```
-Vehículo asignado a Programación 1 → current_step = 0
-                                     próximo = PROGRAMS[1][0] = 'Afinación'
+1. Vehículo asignado a Programación 1, trigger_value = 30 días
+   current_step = 0 → próximo = 'Afinación'
 
-Conductor completa el mantenimiento → POST /flota/horario/:id/avanzar
-                                     current_step = 1
-                                     próximo = PROGRAMS[1][1] = 'Afinación'
+2. GET /mantenimiento dispara syncProgrammedMaintenances()
+   → No hay registro pendiente para este vehículo
+   → INSERT maintenance (scheduled_date = updated_at + 30 días, is_programmed = 1)
 
-... (pasos 2, 3) ...
+3. El registro aparece en el calendario y en la lista
+   → Bloqueado hasta que llegue scheduled_date
 
-current_step = 3  → próximo = 'Medio Ajuste'
-current_step = 7  → próximo = 'Ajuste'
-current_step = 8  → 8 % 8 = 0 → vuelve al inicio del ciclo ('Afinación')
+4. Operador marca el registro como 'completado'
+   → UPDATE maintenance SET status = 'completado'
+   → UPDATE maintenance_schedules SET current_step = 1
+   → La próxima carga de /mantenimiento genera el siguiente registro (paso 2 otra vez)
 ```
-
-El módulo usa `% prog.length` para que sea un ciclo infinito.
 
 ### Agregar una nueva secuencia (Programación 4)
 
-1. En `controllers/fleetController.js`, agregar al objeto `PROGRAMS`:
+1. En **ambos** controllers, agregar al objeto `PROGRAMS`:
 ```javascript
 4: ['Afinación','Afinación','Medio Ajuste','Afinación','Afinación','Ajuste'],
 ```
 
-2. En `views/fleet/form.ejs`, el carrusel de programas se genera automáticamente con `Object.entries(PROGRAMS)`, así que aparecerá sin más cambios.
+2. En `views/fleet/form.ejs`, el carrusel se genera con `Object.entries(PROGRAMS)` — aparece automáticamente.
 
-3. Si `program_id` en la BD es `TINYINT`, soporta hasta 127 — no requiere cambio de schema.
+3. `program_id` es `TINYINT` en BD → soporta hasta 127 sin cambio de schema.
 
-### Cambiar el criterio de activación de distancia a días sin perder datos
+### syncProgrammedMaintenances() — detalles de implementación
 
-La tabla `maintenance_schedules` tiene `trigger_type ENUM('distance','time')`. Para cambiar el criterio de un vehículo específico, simplemente editar el vehículo en `/flota/:id/editar` y guardar con el nuevo criterio seleccionado — el `current_step` se **resetea a 0** por diseño (el upsert hace `program_id=VALUES(program_id)` pero no toca `current_step` en el UPDATE... verificar si se desea preservar el paso actual; si sí, modificar el query en `update` para no resetear `current_step`).
+La función es **idempotente**: antes de insertar, verifica si ya existe un registro con `is_programmed = 1` y `status != 'completado'` para ese vehículo. Si existe, no hace nada. Esto la hace segura para llamar en cada carga de página.
+
+Limitación actual: solo procesa `trigger_type = 'time'`. Para vehículos con criterio por distancia (km), el avance sigue siendo manual via `POST /flota/horario/:id/avanzar`.
 
 ---
 
-## 7. Cómo funciona la subida de fotos
+## 7. Cómo funciona el calendario de mantenimiento
 
-### Flujo completo
+### Construcción server-side
+
+El controller calcula la cuadrícula del mes en curso (o del mes pasado por `?month=YYYY-MM`):
+
+```javascript
+// Construye array de celdas para el grid de 7 columnas
+const firstDow = new Date(year, month - 1, 1).getDay(); // 0=Dom
+const cells = [];
+for (let i = 0; i < firstDow; i++) cells.push({ day: null, key: null });
+for (let d = 1; d <= daysInMonth; d++) {
+  cells.push({
+    day: d,
+    key: `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+  });
+}
+```
+
+El diccionario de eventos se construye desde los registros de mantenimiento con `scheduled_date` en el mes:
+
+```javascript
+const calendarEvents = {};
+calRows.forEach(m => {
+  const d = new Date(m.scheduled_date);
+  const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+  if (!calendarEvents[key]) calendarEvents[key] = [];
+  calendarEvents[key].push(m);
+});
+```
+
+> **Por qué UTC:** Las fechas `DATE` de MySQL se deserializan como medianoche UTC. Usar `getUTCFullYear/Month/Date` evita que la zona horaria del servidor desplace el día.
+
+### Navegación entre meses
+
+Los botones de navegación apuntan a `?month=YYYY-MM`:
+```ejs
+<a href="?month=<%= prevMonth %>">‹</a>
+<a href="?month=<%= nextMonth %>">›</a>
+```
+
+### Eventos en el cliente sin recargar
+
+El controller serializa todos los eventos como JSON dentro del EJS:
+```ejs
+<script>
+  const CAL_EVENTS = <%- JSON.stringify(calendarEvents) %>;
+</script>
+```
+
+El click en un día llama a `showDayEvents(key)` que lee `CAL_EVENTS[key]` y renderiza el panel de eventos en el lado derecho sin hacer una nueva petición al servidor.
+
+### Indicadores de tipo en el calendario
+
+- **Punto naranja** (`maint-cal__dot--prog`): `is_programmed = 1`
+- **Punto azul marino** (`maint-cal__dot--manual`): `is_programmed = 0`
+
+---
+
+## 8. Cómo funciona el historial de vehículo (paginación paralela)
+
+La ruta `GET /flota/:id/historial` (`fleetController.historial`) usa `Promise.all` para hacer cuatro queries simultáneas:
+
+```javascript
+const [[cInsp], [cMaint], [inspections], [maintenances]] = await Promise.all([
+  db.query('SELECT COUNT(*) AS total FROM inspections  WHERE vehicle_id = ?', [id]),
+  db.query('SELECT COUNT(*) AS total FROM maintenance  WHERE vehicle_id = ?', [id]),
+  db.query(`SELECT id, driver_name, engine, lights, tires, safety, result,
+            engine_rating, lights_rating, tires_rating, safety_rating,
+            notes, photos, created_at
+            FROM inspections WHERE vehicle_id = ?
+            ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+           [id, LIMIT, (pageInsp - 1) * LIMIT]),
+  db.query(`SELECT * FROM maintenance WHERE vehicle_id = ?
+            ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+           [id, LIMIT, (pageMaint - 1) * LIMIT]),
+]);
+```
+
+**Por qué excluir `damage_map` y `signature`:** Cada campo base64 ocupa 50–80 KB. En una página que muestra 3 inspecciones, eso sería hasta 480 KB de datos que no se usan. La vista de detalle individual (`/inspecciones/:id`) carga estos campos.
+
+**Paginación independiente:** `pageInsp` y `pageMaint` son parámetros de query separados. Los botones de paginación construyen URLs preservando el otro parámetro:
+
+```javascript
+function pagerUrl(paramName, newPage) {
+  const u = new URL(window.location.href);
+  u.searchParams.set(paramName, newPage);
+  return u.toString();
+}
+```
+
+En EJS esto se implementa con una función helper que construye la URL preservando ambos parámetros de página.
+
+---
+
+## 9. Cómo funciona el dashboard
+
+El `dashboardController.index` ejecuta 6 queries en paralelo. Los KPIs se calculan en el controller antes de pasar a la vista:
+
+```javascript
+const availability = vStats.total > 0
+  ? Math.round((vStats.active / vStats.total) * 100) : 0;
+```
+
+La gráfica de 7 días rellena los días sin datos:
+```javascript
+const chartData = last7Days.map(d => chartMap[d] || { pass_count: 0, fail_count: 0 });
+```
+
+El mapa SVG en `dashboard/index.ejs` usa coordenadas hardcodeadas (`viewBox="0 0 900 360"`):
+- Ruta A: línea horizontal naranja (`y=120`).
+- Ruta B: línea diagonal gris.
+- Ruta C: línea vertical verde.
+- Marcadores de vehículos: círculos generados desde `fleetList.slice(0,6)` con 6 posiciones fijas.
+
+El SVG es solo una representación esquemática de demostración.
+
+---
+
+## 10. Cómo agregar más rutas al selector de ruta
+
+Las rutas están hardcodeadas en `views/inspections/form.ejs`. Para producción real con rutas dinámicas:
+
+### Opción A — Ampliar el array inline (simple, para pocas rutas fijas)
+
+En `views/inspections/form.ejs`, agregar al array de rutas:
+```javascript
+{ val:'D', name:'Ruta D', desc:'Terminal Oeste → Destino D', color:'#7c3aed' },
+```
+
+También actualizar la validación del campo `route` en la BD si se cambió de `VARCHAR(2)` a `VARCHAR(1)`. Con valores de una letra (A–Z) alcanza 26 rutas.
+
+### Opción B — Tabla de rutas en BD (para rutas configurables desde la UI)
+
+1. Crear tabla `routes`:
+```sql
+CREATE TABLE routes (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  code        VARCHAR(10) NOT NULL UNIQUE,
+  name        VARCHAR(80) NOT NULL,
+  description VARCHAR(200),
+  color       VARCHAR(20) DEFAULT '#8192a7'
+);
+```
+
+2. En `inspectionController.create`, cargar las rutas:
+```javascript
+const [routes] = await db.query('SELECT * FROM routes ORDER BY code');
+res.render('inspections/form', { title: 'Nueva Inspección', vehicles, routes });
+```
+
+3. En `form.ejs`, reemplazar el array hardcodeado por `<% routes.forEach(r => { %>`.
+
+4. Cambiar la columna `inspections.route` a `VARCHAR(10)` (o FK a `routes.id`).
+
+---
+
+## 11. Cómo funciona la subida de fotos
 
 ```
 form.ejs: <input type="file" name="evidencia" multiple />
@@ -418,18 +524,17 @@ form.ejs: <input type="file" name="evidencia" multiple />
 routes/inspections.js: upload.array('evidencia', 5)
     ↓ Multer intercepta los archivos
 config/multer.js:
-  - Valida tipo: jpeg/jpg/png/webp (por extensión Y por mimetype)
-  - Valida tamaño: máx 5 MB por archivo
-  - Genera nombre: `{Date.now()}-{random}.{ext}`
-  - Guarda en: /app/public/uploads/ (Docker) o ./public/uploads/ (local)
+  - Valida tipo: jpeg/jpg/png/webp (extensión Y mimetype)
+  - Valida tamaño: máx 5 MB
+  - Genera nombre: {Date.now()}-{random}.{ext}
+  - Guarda en: public/uploads/
     ↓
-controllers/inspectionController.js:
+inspectionController.js:
   const photos = req.files ? req.files.map(f => f.filename).join(',') : '';
-  // photos = "1716000000000-123.jpg,1716000000001-456.png"
     ↓
-MySQL: INSERT ... photos = '1716000000000-123.jpg,1716000000001-456.png'
+MySQL: photos = '1716000000000-123.jpg,1716000000001-456.png'
     ↓
-views/inspections/show.ejs:
+show.ejs:
   <% inspection.photos.split(',').forEach(photo => { %>
     <img src="/uploads/<%= photo %>" />
   <% }) %>
@@ -437,465 +542,286 @@ views/inspections/show.ejs:
 
 ### Cambiar el límite de fotos o el tamaño máximo
 
-En `config/multer.js`:
-```javascript
-const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }  // cambiar a 10 MB
-});
-```
-
-En `routes/inspections.js`:
-```javascript
-upload.array('evidencia', 10)  // cambiar a máx 10 archivos
-```
-
-### Agregar subida de fotos a otro módulo (ej. mantenimiento)
-
-1. Importar multer en el router:
-```javascript
-const { upload } = require('../config/multer');
-router.post('/', upload.array('fotos', 3), maintenanceController.store);
-```
-
-2. Agregar columna `photos TEXT` a la tabla `maintenance`.
-
-3. En el controller, procesar `req.files`.
-
-4. En el formulario EJS, agregar `enctype="multipart/form-data"` al `<form>` y el campo `<input type="file">`.
+En `config/multer.js`: `limits: { fileSize: 10 * 1024 * 1024 }` → 10 MB.
+En `routes/inspections.js`: `upload.array('evidencia', 10)` → hasta 10 archivos.
 
 ---
 
-## 8. Cómo funciona el mapa de daños y la firma digital
-
-Ambos utilizan el elemento `<canvas>` de HTML5, que permite dibujar con JavaScript.
+## 12. Cómo funciona el mapa de daños y la firma digital
 
 ### Mapa de daños
 
+El canvas es transparente y se posiciona encima de la imagen del vehículo con `position: absolute`. Solo contiene los círculos de daño. La imagen del vehículo se puede reconstruir desde el `type` del vehículo guardado en la inspección.
+
+El evento `onload` de la imagen se asigna **antes** de `src` para garantizar que dispare aunque la imagen esté en caché:
 ```javascript
-// En form.ejs (script inline):
-const damageCanvas = document.getElementById('damageCanvas');
-const damageCtx    = damageCanvas.getContext('2d');
-const marks        = [];   // Array de {x, y} — posiciones de los círculos
-
-// Al hacer click sobre el canvas:
-damageCanvas.addEventListener('click', function(e) {
-  const rect = damageCanvas.getBoundingClientRect();
-  marks.push({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  redrawMarks();   // Borra y redibuja todos los círculos
-  saveDamageMap(); // Convierte el canvas a base64 y lo guarda en el input hidden
-});
-
-function redrawMarks() {
-  damageCtx.clearRect(0, 0, damageCanvas.width, damageCanvas.height);
-  marks.forEach(({x, y}, idx) => {
-    damageCtx.arc(x, y, 18, 0, Math.PI * 2);
-    damageCtx.strokeStyle = '#ba1a1a';
-    // ... dibuja círculo y número
-  });
-}
-
-function saveDamageMap() {
-  // toDataURL() convierte el canvas a una cadena como:
-  // "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-  document.getElementById('damageMapData').value = damageCanvas.toDataURL();
-}
+vImg.onload = function() { canvasReady = true; ... };
+vImg.src = IMAGE_MAP[vehicleType];
+if (vImg.complete && vImg.naturalWidth > 0) { canvasReady = true; ... }
 ```
 
-La imagen del vehículo (fondo) se muestra como `<img>` separado, **no** sobre el canvas. El canvas es transparente y está posicionado encima con `position: absolute`. De esta forma los círculos se dibujan visualmente sobre la imagen pero el canvas solo contiene los círculos, no la imagen.
+En `show.ejs`, el canvas guardado se muestra como un segundo `<img>` sobre la imagen del vehículo:
+```ejs
+<img class="dmg-img"     src="<%= vImgSrc %>"              alt="vehículo" />
+<img class="dmg-overlay" src="<%= inspection.damage_map %>" alt="marcas" />
+```
 
-Cuando se guarda: solo el canvas (con los círculos) se almacena como base64 en `inspections.damage_map`. La imagen del vehículo se puede reconstruir desde el tipo de vehículo.
+Ambos tienen `position: absolute; inset: 0` dentro de un contenedor relativo. Las marcas se alinean porque el canvas se capturó con las mismas dimensiones del contenedor.
 
 ### Firma digital
 
-Mismo principio pero en lugar de círculos, dibuja líneas continuas siguiendo el movimiento del mouse:
-
-```javascript
-sigCanvas.addEventListener('mousemove', e => {
-  if (!drawing) return;
-  sigCtx.lineTo(x, y);   // Dibuja línea hasta la posición actual
-  sigCtx.stroke();
-});
-```
-
-Se guarda como base64 en `inspections.signature`.
-
-**Para mostrar la imagen en el detalle** (show.ejs):
-```ejs
-<img src="<%= inspection.signature %>" alt="Firma" />
-<!-- src puede ser un data:URL, el browser lo renderiza directamente -->
-```
-
-### Por qué usar base64 en lugar de archivos
-
-El canvas no genera un archivo directamente; solo puede exportar como data URL (`data:image/png;base64,...`). Guardar esto en la BD es más simple que generar un archivo, aunque ocupa más espacio en la base de datos. Para un volumen alto de inspecciones, considerar convertir el base64 a un archivo PNG real con una librería como `canvas` o recibir la imagen en el servidor y procesarla.
+Mismo principio: canvas con líneas continuas siguiendo el movimiento del mouse/dedo, guardado como base64 en `inspections.signature` y mostrado en `show.ejs` como `<img src="<%= inspection.signature %>">`.
 
 ---
 
-## 9. Cómo modificar el sistema de diseño (colores, tipografía)
+## 13. Cómo modificar el sistema de diseño (colores, tipografía)
 
-Todos los estilos están en un solo archivo: `public/css/style.css`.
-
-### Variables CSS (tokens de diseño)
-
-Al principio del archivo está el bloque `:root` con todas las variables:
+Todos los estilos están en `public/css/style.css`. Al inicio está el bloque `:root`:
 
 ```css
 :root {
-  --navy:       #1a2b3c;   ← Color principal: azul marino
-  --navy-dark:  #041627;   ← Variante oscura del navy
-  --orange:     #fd8b00;   ← Naranja de acción (Safety Orange)
-  --surface:    #f8f9ff;   ← Fondo general de la página
+  --navy:       #1a2b3c;
+  --navy-dark:  #041627;
+  --orange:     #fd8b00;
+  --surface:    #f8f9ff;
   --white:      #ffffff;
   ...
 }
 ```
 
-Para cambiar el color de acción principal de toda la app de naranja a, por ejemplo, azul eléctrico:
+Cambiar `--orange` propaga el cambio a todos los botones de acción, barras de progreso, dots del carrusel, etc.
+
+Las reglas nuevas van al final de `style.css`, agrupadas con comentario de sección:
 ```css
---orange: #2563eb;
+/* ── Nombre del componente ───────────────────────────────── */
 ```
 
-Ese cambio se propaga automáticamente a todos los botones de acción, la barra de progreso, los dots del carrusel, etc.
-
-### Agregar un nuevo componente con el estilo del proyecto
-
-Seguir el patrón BEM (Block-Element-Modifier) que ya usa el archivo:
-```css
-/* Bloque */
-.mi-componente { ... }
-
-/* Elemento */
-.mi-componente__titulo { ... }
-.mi-componente__cuerpo { ... }
-
-/* Modificador */
-.mi-componente--destacado { background: var(--navy); }
-```
-
-### Cambiar la fuente tipográfica
-
-En `views/partials/head.ejs`:
-```html
-<!-- Cambiar la URL de Google Fonts: -->
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-```
-
-En `public/css/style.css`, cambiar la propiedad `font-family` en el `body`:
-```css
-body { font-family: 'Roboto', sans-serif; ... }
-```
+Seguir convención BEM: `.bloque`, `.bloque__elemento`, `.bloque--modificador`.
 
 ---
 
-## 10. Cómo agregar un nuevo tipo de vehículo con su imagen
+## 14. Cómo agregar un nuevo tipo de vehículo con su imagen
 
-### Paso 1 — Preparar la imagen
+1. **Preparar la imagen** — PNG con fondo transparente, vista lateral, 400–700 px de ancho. Guardar en `public/images/MiVehiculo.png`.
 
-- Formato: PNG con fondo transparente (RGBA), vista lateral del vehículo.
-- Ancho recomendado: entre 400 y 700 px. Mayor que 900 px funcionará igual pero carga más lento.
-- Guardar en: `public/images/MiVehiculo.png`
-
-### Paso 2 — Copiar la imagen al contenedor Docker
-
+2. **Copiar al contenedor Docker:**
 ```bash
 docker cp public/images/MiVehiculo.png proyect-app-1:/app/public/images/
 ```
 
-### Paso 3 — Agregar el tipo en el formulario de flota
-
-En `views/fleet/form.ejs`, dentro del `<select name="type">`:
+3. **Agregar la opción en el form de flota** (`views/fleet/form.ejs`):
 ```html
 <option value="remolque" <%= vehicle && vehicle.type === 'remolque' ? 'selected' : '' %>>Remolque</option>
 ```
 
-### Paso 4 — Conectar el tipo con la imagen en el mapa de daños
-
-En `views/inspections/form.ejs`, en el bloque `<script>`:
+4. **Conectar con el mapa de daños** (`views/inspections/form.ejs`):
 ```javascript
 const IMAGE_MAP = {
   'camión':      '/images/Trailer.png',
   'furgoneta':   '/images/camioneta.png',
   'automóvil':   '/images/Carro.png',
   'motocicleta': '/images/Moto.png',
-  'remolque':    '/images/MiVehiculo.png',  // ← Agregar aquí
+  'remolque':    '/images/MiVehiculo.png',  // ← agregar aquí
 };
 ```
 
+5. **Agregar la misma entrada** en `views/fleet/historial.ejs` y `views/inspections/show.ejs` donde se mapea el tipo a la imagen.
+
 ---
 
-## 11. Migraciones de base de datos
+## 15. Migraciones de base de datos
 
-Este proyecto no usa un framework de migraciones (como Flyway o Liquibase). Las migraciones se hacen manualmente.
+Este proyecto no usa un framework de migraciones. Las migraciones se hacen manualmente.
 
 ### Procedimiento estándar
 
 1. Escribir el SQL de migración.
 2. Aplicarlo en la BD corriendo.
-3. Actualizar `database/schema.sql` para que nuevas instalaciones lo incluyan.
+3. Actualizar `database/schema.sql`.
 4. Actualizar controllers y vistas.
-5. Documentar el cambio (puede ser un comentario en `schema.sql` o en el historial de git).
 
-### Ejemplo de migración aplicada en Docker
+### Ejemplo con Docker
 
 ```bash
 docker exec -i proyect-db-1 mysql -ufleetops -psecret fleetops_db <<'SQL'
-ALTER TABLE vehicles
-  ADD COLUMN odometer     INT     DEFAULT NULL,
-  ADD COLUMN last_service DATE    DEFAULT NULL;
+ALTER TABLE vehicles ADD COLUMN odometer INT DEFAULT NULL;
 SQL
 ```
 
-### Revertir una migración
+> MySQL 8.0 no soporta `IF NOT EXISTS` en `ALTER TABLE ADD COLUMN`. Si el script puede correr dos veces, verificar primero con una `SELECT` sobre `information_schema`.
 
-MySQL no tiene rollback de DDL automático. Para revertir:
-```bash
-docker exec -i proyect-db-1 mysql -ufleetops -psecret fleetops_db -e \
-  "ALTER TABLE vehicles DROP COLUMN odometer, DROP COLUMN last_service;"
-```
-
-### Recrear la BD desde cero (desarrollo)
+### Recrear la BD desde cero (solo desarrollo)
 
 ```bash
-# Borra el volumen y lo recrea con schema.sql limpio
-docker compose down -v
-docker compose up -d
+docker compose down -v   # borra el volumen de datos
+docker compose up -d     # recrea con schema.sql limpio
 ```
-
-**Advertencia:** esto borra todos los datos. Solo en desarrollo.
 
 ---
 
-## 12. Docker — producción y operación
+## 16. Docker — producción y operación
 
-### Reconstruir la imagen después de cambios en dependencias
+### Cuándo se necesita `--build`
 
-```bash
-docker compose up --build
-```
-
-Necesario siempre que se modifique `package.json` o `Dockerfile`.
+| Cambio | Acción necesaria |
+|---|---|
+| `package.json` (nueva dependencia) | `docker compose up --build` |
+| `Dockerfile` | `docker compose up --build` |
+| `app.js` | `docker compose restart app` |
+| `views/**/*.ejs` | Ninguna — volumen montado, recarga instantánea |
+| `public/css/style.css` | Ninguna — volumen montado |
+| `public/js/**` | Ninguna — volumen montado |
+| `controllers/**` | `docker compose restart app` (nodemon no corre en prod) |
+| `routes/**` | `docker compose restart app` |
 
 ### Ver logs en tiempo real
 
 ```bash
-docker compose logs -f app    # Solo la app Node.js
+docker compose logs -f app    # Solo Node.js
 docker compose logs -f db     # Solo MySQL
 docker compose logs -f        # Ambos
 ```
 
-### Acceder a la shell del contenedor
+### Backup y restauración
 
 ```bash
-docker exec -it proyect-app-1 sh    # Shell de la app
-docker exec -it proyect-db-1 bash   # Shell de MySQL
-```
-
-### Hacer backup de la base de datos
-
-```bash
+# Backup
 docker exec proyect-db-1 \
   mysqldump -ufleetops -psecret fleetops_db \
   > backup-$(date +%Y%m%d).sql
-```
 
-### Restaurar backup
-
-```bash
+# Restauración
 docker exec -i proyect-db-1 \
   mysql -ufleetops -psecret fleetops_db \
   < backup-20260517.sql
 ```
 
-### Cambiar el puerto público de la app
+### Cambiar el puerto público
 
-En `docker-compose.yml`:
-```yaml
-ports:
-  - "8080:3000"   # Ahora accesible en :8080 del host
-```
-
-### Agregar reinicio automático
-
-En `docker-compose.yml`, dentro del servicio `app`:
-```yaml
-restart: unless-stopped
-```
-
-Esto hace que el contenedor se reinicie automáticamente si el servidor se reinicia o la app falla.
+En `docker-compose.yml`: `ports: - "8080:3000"` → accesible en `:8080`.
 
 ---
 
-## 13. Escalabilidad — qué cambiar cuando crezca
+## 17. Escalabilidad — qué cambiar cuando crezca
 
 ### Si aumentan los usuarios simultáneos
 
-**Problema:** Node.js es de un solo hilo. Con muchas solicitudes simultáneas puede congestionarse.
+Aumentar el pool en `config/db.js`: `connectionLimit: 25`.
 
-**Solución 1 — Aumentar el pool de conexiones MySQL:**
-En `config/db.js`:
-```javascript
-const pool = mysql.createPool({
-  ...
-  connectionLimit: 25,   // subir de 10 a 25 o más
-});
-```
+Para múltiples instancias: agregar Nginx como reverse proxy con `deploy: replicas: 3` en `docker-compose.yml`.
 
-**Solución 2 — Múltiples instancias con un balanceador de carga:**
-Agregar Nginx como proxy inverso con múltiples instancias de la app:
-```yaml
-# docker-compose.yml (ejemplo simplificado)
-app:
-  deploy:
-    replicas: 3
-nginx:
-  image: nginx
-  # configurar upstream a las 3 instancias
-```
+### Si el base64 de firmas y daños crece mucho
 
-### Si el almacenamiento de fotos crece mucho
+Un canvas de 380×130 px ocupa ~50–80 KB como base64. Para 10.000 inspecciones = 500–800 MB solo en firmas.
 
-Las fotos se guardan en `public/uploads/` dentro del contenedor, montado como volumen local. Si la carpeta crece mucho:
-
-- **Opción A:** Montar el volumen en un disco de mayor capacidad.
-- **Opción B:** Migrar a almacenamiento en la nube (AWS S3, Cloudflare R2). Instalar `@aws-sdk/client-s3` y modificar `config/multer.js` para usar `multer-s3` en lugar de diskStorage.
-
-### Si el base64 de firmas y mapas de daños pesa mucho en MySQL
-
-Un canvas de 380×130 px como base64 ocupa aprox. 50–80 KB por firma. Para 10.000 inspecciones = 500–800 MB solo en firmas.
-
-**Solución:** Convertir el base64 a archivo PNG en el servidor al recibir el POST, guardar el nombre del archivo en BD, y servir el archivo estáticamente. El campo `MEDIUMTEXT` de MySQL soporta hasta 16 MB, así que no hay problema inmediato, pero sí de performance en consultas.
+Solución: convertir el base64 a archivo PNG en el servidor al recibir el POST, guardar el nombre del archivo en BD, y servir estáticamente. Los campos `MEDIUMTEXT` soportan hasta 16 MB por fila, pero las queries de listado ya los excluyen (`SELECT id, driver_name, ...` sin `damage_map` ni `signature`).
 
 ### Si se necesita autenticación
 
-Actualmente el sistema no tiene login. Para agregar:
-
-1. Instalar: `npm install express-session bcryptjs connect-mysql2`
+1. `npm install express-session bcryptjs connect-mysql2`
 2. Crear tabla `users` (id, email, password_hash, role).
 3. Crear `routes/auth.js` con GET/POST `/login` y GET `/logout`.
 4. Agregar middleware de autenticación en `app.js` antes de las rutas protegidas.
-5. Almacenar sesiones en MySQL para que persistan si el contenedor se reinicia.
 
-### Si se necesita una API REST (para una app móvil, por ejemplo)
+### Si se necesita rastreo GPS real
 
-Express puede devolver JSON además de HTML. Para las mismas rutas, detectar si el cliente pide JSON:
-```javascript
-exports.index = async (req, res, next) => {
-  const [vehicles] = await db.query('SELECT * FROM vehicles');
-  if (req.accepts('json')) {
-    return res.json(vehicles);
-  }
-  res.render('fleet/index', { vehicles, ... });
-};
-```
-
-O crear rutas separadas bajo `/api/v1/` que solo devuelvan JSON.
+El campo `phone` en `vehicles` es el punto de conexión: contiene el número del dispositivo GPS instalado. Para activar el mapa real:
+1. Integrar con una API de rastreo (Traccar, Google Maps Platform, etc.).
+2. Reemplazar el SVG estático en `dashboard/index.ejs` con el mapa interactivo.
+3. El selector de rutas en `inspections/form.ejs` pasaría de ser demo a funcional comparando la posición GPS contra el polígono de cada ruta.
 
 ---
 
-## 14. Errores comunes y cómo resolverlos
+## 18. Errores comunes y cómo resolverlos
+
+### La vista muestra el diseño antiguo aunque se editó el archivo
+
+Con Docker, si el directorio no está montado como volumen, el contenedor usa la versión del archivo que tenía cuando se construyó la imagen. Verificar que `docker-compose.yml` tenga los mounts de `./views`, `./public/css`, `./public/js`, `./controllers` y `./routes`. Si falta alguno, agregar y correr `docker compose up --build` una vez.
 
 ### `ReferenceError: next is not defined`
 
-El handler async no declaró `next` como tercer parámetro:
 ```javascript
-// ❌ Error
+// ❌
 exports.index = async (req, res) => { ... next(err); }
-
-// ✅ Correcto
+// ✅
 exports.index = async (req, res, next) => { ... next(err); }
-```
-
-### `Error: ENOENT: no such file or directory, open 'public/uploads/...'`
-
-El directorio `public/uploads/` no existe. Crear el directorio:
-```bash
-mkdir -p public/uploads
-touch public/uploads/.gitkeep
-```
-O agregar lógica en `config/multer.js` para crearlo si no existe:
-```javascript
-const fs = require('fs');
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 ```
 
 ### `Error: ER_DUP_ENTRY` al crear un vehículo
 
-La placa ya existe en la BD. El campo `plate` tiene una restricción `UNIQUE`. El controller actualmente no maneja este error de forma amigable. Para mejorarlo:
+La placa ya existe (campo `UNIQUE`). Para manejo amigable:
 ```javascript
 } catch (err) {
   if (err.code === 'ER_DUP_ENTRY') {
     return res.render('fleet/form', {
-      title: 'Nuevo Vehículo',
-      vehicle: req.body,
-      error: 'Ya existe un vehículo con esa placa.',
-      PROGRAMS,
-      schedule: null,
+      title: 'Nuevo Vehículo', vehicle: req.body,
+      error: 'Ya existe un vehículo con esa placa.', PROGRAMS, schedule: null,
     });
   }
   next(err);
 }
 ```
 
-### `address already in use :::3306`
-
-MySQL local ya está corriendo en el puerto 3306 y Docker intenta usarlo también. Solución: no exponer el puerto de la BD al host. En `docker-compose.yml`, el servicio `db` no debe tener sección `ports` (la app se conecta internamente por nombre de host `db`).
-
 ### La imagen del vehículo no aparece en el formulario de inspección
 
-1. Verificar que el tipo del vehículo en BD coincide exactamente con las claves del `IMAGE_MAP` en `form.ejs` (por ejemplo, `'camión'` con tilde).
-2. Verificar que el archivo existe en `public/images/` y en `/app/public/images/` dentro del contenedor.
-3. Verificar que el select del vehículo tiene el atributo `data-type` poblado:
-```ejs
-<option value="<%= v.id %>" data-type="<%= v.type %>">
-```
+1. Verificar que el tipo del vehículo en BD coincida exactamente con las claves del `IMAGE_MAP` en `form.ejs` (ej. `'camión'` con tilde).
+2. Verificar que el archivo existe en `public/images/` y dentro del contenedor Docker.
+3. Verificar que el `<option>` del vehículo tenga `data-type` poblado.
 
 ### El canvas del mapa de daños no responde al click
 
-Verificar en la consola del navegador (F12 → Console) si hay errores. El canvas solo funciona si `canvasReady = true`, lo cual se activa en el evento `onload` de la imagen del vehículo. Si el vehículo no tiene tipo o el tipo no tiene imagen en `IMAGE_MAP`, el placeholder permanece visible y el canvas no se activa.
+El canvas solo se activa si `canvasReady = true`, lo que ocurre en el `onload` de la imagen del vehículo. Si el vehículo no tiene tipo o el tipo no está en `IMAGE_MAP`, el placeholder permanece y el canvas no se activa.
+
+### `address already in use :::3306`
+
+MySQL local ya corre en el puerto 3306. El servicio `db` no debe exponer `ports` al host — la app se conecta internamente por el hostname `db`.
+
+### Error al hacer `ALTER TABLE`: `Duplicate column name`
+
+MySQL no soporta `IF NOT EXISTS` en `ALTER TABLE ADD COLUMN`. La migración falló a medias o ya se aplicó. Verificar con:
+```sql
+SHOW COLUMNS FROM vehicles LIKE 'phone';
+```
+Si ya existe, no reaplicar.
 
 ---
 
-## 15. Convenciones de código del proyecto
+## 19. Convenciones de código del proyecto
 
 ### Nombres de archivos
 
 - Controllers: `camelCase` + sufijo `Controller` → `fleetController.js`
 - Routes: `camelCase` → `fleet.js`
-- Vistas: `camelCase` o `kebab-case` → `form.ejs`, `index.ejs`
-- CSS: clases en `kebab-case` con convención BEM → `.car-slide__hero--active`
+- Vistas: `camelCase` o `kebab-case` → `form.ejs`, `historial.ejs`
+- CSS: clases en `kebab-case` con convención BEM → `.maint-cal__day--today`
 
 ### Async/await y manejo de errores
 
-Todos los métodos async usan `try/catch` y pasan el error a `next(err)` para que el middleware de error global de `app.js` lo capture:
 ```javascript
 exports.index = async (req, res, next) => {
   try {
     // lógica
   } catch (err) {
-    next(err);  // → middleware de error en app.js
+    next(err);  // → middleware de error global en app.js
   }
 };
 ```
 
 ### Queries SQL
 
-- Siempre usar parámetros preparados (`?`), nunca concatenar variables.
-- Desestructurar el resultado: `const [rows] = await db.query(...)` porque mysql2 devuelve `[rows, fields]`.
-- Para INSERTs que necesitan el ID insertado: `const [result] = await db.query(...)` → `result.insertId`.
+- Siempre parámetros preparados (`?`), nunca concatenación.
+- Desestructurar: `const [rows] = await db.query(...)`.
+- Para INSERTs con ID: `const [result] = await db.query(...)` → `result.insertId`.
+- Para queries paralelas independientes: `const [[a], [b], [c]] = await Promise.all([...])`.
 
 ### Vistas EJS
 
 - Incluir siempre `partials/head`, `partials/sidebar` (con `currentPage`) y `partials/topbar`.
-- El `currentPage` activa la clase `sidebar__link--active` en el menú.
-- Pasar siempre `title` al `render()` — se usa en `<title>` del head.
+- Pasar siempre `title` al `render()`.
+- No cargar `damage_map` ni `signature` en queries de listado — solo en `show`.
 
 ### CSS
 
-- Todas las reglas nuevas van al final de `public/css/style.css`, agrupadas por componente con un comentario de sección:
-```css
-/* ── Nombre del componente ───────────────────────────────── */
-```
-- Usar variables CSS (`var(--navy)`, `var(--orange)`) en lugar de colores literales.
-- No usar `!important` salvo casos de override muy justificados.
+- Reglas nuevas al final de `public/css/style.css`, agrupadas con comentario de sección.
+- Usar `var(--navy)`, `var(--orange)` en lugar de colores literales.
+- No usar `!important` salvo override muy justificado.
