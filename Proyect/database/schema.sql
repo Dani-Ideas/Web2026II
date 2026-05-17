@@ -24,10 +24,15 @@ CREATE TABLE IF NOT EXISTS inspections (
   tires       ENUM('pass','caution','fail') NOT NULL,
   safety      ENUM('pass','caution','fail') NOT NULL,
   result      ENUM('pass','fail') NOT NULL,
-  notes       TEXT,
-  photos      TEXT,
-  signature   MEDIUMTEXT,
-  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  engine_rating TINYINT DEFAULT NULL,
+  lights_rating TINYINT DEFAULT NULL,
+  tires_rating  TINYINT DEFAULT NULL,
+  safety_rating TINYINT DEFAULT NULL,
+  notes         TEXT,
+  photos        TEXT,
+  damage_map    MEDIUMTEXT DEFAULT NULL,
+  signature     MEDIUMTEXT,
+  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
 );
 

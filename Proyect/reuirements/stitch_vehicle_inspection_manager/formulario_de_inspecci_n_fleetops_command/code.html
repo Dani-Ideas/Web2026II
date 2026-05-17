@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#d6e4f9",
+                    "on-tertiary-container": "#3aa186",
+                    "primary": "#041627",
+                    "surface-container-low": "#eef4ff",
+                    "surface-container-high": "#dce9fe",
+                    "secondary-fixed": "#ffdcc3",
+                    "inverse-surface": "#243141",
+                    "on-surface-variant": "#44474c",
+                    "tertiary": "#001912",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#e5eeff",
+                    "on-primary-fixed-variant": "#38485a",
+                    "on-secondary-fixed": "#2f1500",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#1a2b3c",
+                    "primary-fixed-dim": "#b7c8de",
+                    "on-secondary-container": "#603100",
+                    "tertiary-fixed-dim": "#76d8bb",
+                    "on-primary-container": "#8192a7",
+                    "surface-tint": "#4f6073",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed-variant": "#6e3900",
+                    "surface": "#f8f9ff",
+                    "on-surface": "#0f1c2b",
+                    "primary-fixed": "#d2e4fb",
+                    "secondary-container": "#fd8b00",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#92f5d6",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-tertiary": "#ffffff",
+                    "on-background": "#0f1c2b",
+                    "secondary": "#904d00",
+                    "surface-dim": "#cddbf0",
+                    "outline-variant": "#c4c6cd",
+                    "background": "#f8f9ff",
+                    "inverse-primary": "#b7c8de",
+                    "on-primary-fixed": "#0b1d2d",
+                    "surface-container-highest": "#d6e4f9",
+                    "on-tertiary-fixed-variant": "#005140",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary-container": "#003025",
+                    "on-tertiary-fixed": "#002018",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#ffb77d",
+                    "outline": "#74777d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "unit": "4px",
+                    "gutter": "16px",
+                    "sm": "8px",
+                    "xl": "40px",
+                    "margin-page": "32px",
+                    "xs": "4px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "data-tabular": ["Inter"],
+                    "title-sm": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-base": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "data-tabular": ["14px", {"lineHeight": "1", "fontWeight": "500"}],
+                    "title-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "display-lg": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-base": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-base overflow-x-hidden">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-primary dark:bg-primary flex flex-col h-full py-md gap-sm border-r border-outline dark:border-on-primary-fixed-variant z-50 hidden md:flex">
+<div class="px-md mb-lg">
+<h2 class="text-title-sm font-title-sm text-on-primary uppercase tracking-widest">Global Logistics</h2>
+<p class="text-on-primary-container text-[10px] opacity-70">Terminal A-12</p>
+</div>
+<nav class="flex-grow">
+<a class="flex items-center px-md py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="text-label-caps font-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center px-md py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">directions_car</span>
+<span class="text-label-caps font-label-caps">Fleet</span>
+</a>
+<a class="flex items-center px-md py-3 bg-secondary-container text-on-secondary-container font-bold rounded-lg my-1 mx-2" href="#">
+<span class="material-symbols-outlined mr-3">fact_check</span>
+<span class="text-label-caps font-label-caps">Inspections</span>
+</a>
+<a class="flex items-center px-md py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">build</span>
+<span class="text-label-caps font-label-caps">Maintenance</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-on-primary-fixed-variant/20 pt-md">
+<a class="flex items-center px-md py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">help</span>
+<span class="text-label-caps font-label-caps">Support</span>
+</a>
+<a class="flex items-center px-md py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150 text-error" href="#">
+<span class="material-symbols-outlined mr-3">logout</span>
+<span class="text-label-caps font-label-caps">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-lg h-16 z-40 fixed top-0 left-0 md:left-64 md:w-[calc(100%-16rem)] bg-surface-container-lowest border-b border-outline-variant">
+<div class="flex items-center gap-md">
+<span class="text-headline-md font-headline-md text-primary tracking-tight font-black">FleetOps Command</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden sm:flex gap-sm">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container transition-all duration-200 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container transition-all duration-200 rounded-full">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<button class="bg-secondary-container text-on-secondary-container font-bold px-lg py-2 rounded transition-all duration-200 active:opacity-80">
+                Dispatch
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-12 px-md md:px-xl ml-0 md:ml-64 min-h-screen flex flex-col gap-lg max-w-6xl mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-md border-b border-outline-variant pb-md">
+<div>
+<span class="text-label-caps font-label-caps text-secondary uppercase tracking-widest">Inspección Operativa</span>
+<h1 class="text-display-lg font-display-lg text-primary mt-1">Formulario de Inspección Diaria</h1>
+<p class="text-on-surface-variant font-body-base">Vehículo: <span class="font-bold">VOLVO FH-460 [B-4521-TX]</span></p>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-1">FECHA Y HORA</span>
+<span class="text-title-sm font-title-sm bg-surface-container px-3 py-1 border border-outline-variant">24 MAY 2024 - 06:45 AM</span>
+</div>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+<!-- Left Column: Checklist -->
+<div class="md:col-span-8 flex flex-col gap-lg">
+<!-- Category: Motor -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-primary">earth_engine</span>
+<h3 class="text-title-sm font-title-sm text-primary uppercase">Motor y Mecánica</h3>
+</div>
+<div class="grid grid-cols-1 gap-sm">
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer group">
+<span class="font-data-tabular text-on-surface">Nivel de Aceite (Varilla/Sensor)</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer group">
+<span class="font-data-tabular text-on-surface">Líquido Refrigerante / Anticongelante</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer group">
+<span class="font-data-tabular text-on-surface">Estado de Correas y Tensores</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Category: Luces -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+<h3 class="text-title-sm font-title-sm text-primary uppercase">Sistema de Iluminación</h3>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Luces de Cruce / Carretera</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Intermitentes / Emergencia</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Luces de Freno / Posición</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Iluminación de Matrícula</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Category: Neumáticos -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-primary">tire_repair</span>
+<h3 class="text-title-sm font-title-sm text-primary uppercase">Ruedas y Neumáticos</h3>
+</div>
+<div class="grid grid-cols-1 gap-sm">
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Presión de Aire (Visual/Medida)</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Profundidad del Dibujo (Min 1.6mm)</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+</div>
+</section>
+<!-- Category: Seguridad -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-primary">security</span>
+<h3 class="text-title-sm font-title-sm text-primary uppercase">Elementos de Seguridad</h3>
+</div>
+<div class="grid grid-cols-1 gap-sm">
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Frenos de Servicio y Estacionamiento</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Extintor (Carga y Fecha Vigente)</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3 bg-surface hover:bg-surface-container transition-colors border border-outline-variant cursor-pointer">
+<span class="font-data-tabular text-on-surface">Chalecos y Triángulos de Señalización</span>
+<input class="w-6 h-6 border-2 border-primary text-secondary-container focus:ring-secondary focus:ring-offset-0" type="checkbox"/>
+</label>
+</div>
+</section>
+</div>
+<!-- Right Column: Evidence & Signature -->
+<div class="md:col-span-4 flex flex-col gap-lg">
+<!-- Observations -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<h3 class="text-title-sm font-title-sm text-primary uppercase mb-md">Observaciones</h3>
+<textarea class="w-full h-32 border-outline focus:border-secondary focus:ring-0 bg-surface p-md font-body-base text-on-surface-variant" placeholder="Describa cualquier anomalía detectada..."></textarea>
+</section>
+<!-- Photo Upload -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<h3 class="text-title-sm font-title-sm text-primary uppercase mb-md">Evidencia Fotográfica</h3>
+<div class="border-2 border-dashed border-outline-variant p-lg flex flex-col items-center justify-center gap-sm bg-surface hover:bg-surface-container cursor-pointer transition-all">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant">add_a_photo</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant text-center">Tocar para subir fotos de desperfectos</p>
+</div>
+<div class="grid grid-cols-2 gap-sm mt-md">
+<div class="aspect-square bg-surface-container relative group">
+<img alt="Evidencia" class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all" data-alt="A close-up high-contrast photograph of a worn truck tire tread, highlighting mechanical wear and tear. The lighting is harsh and industrial, casting deep shadows that emphasize the texture of the rubber against a clean warehouse concrete floor. The aesthetic is professional and forensic, suitable for a logistics maintenance report." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf9_KrBKJkAzidL-OzbeATjIcZe0CUN7ANWLKHp0WlNZ7RFNh3bXrgrwX4wxeIAFJIwUimdDltVNPzCnGHoB2yYjd9DhjECn_nLgZQmkJpoiB67kuhNl2LvBn0_-ymsvXUM1DlqWFcPfI14GQ-AXg1irQZXoD4tR2-ogXxx8_-CIgTNut0_ZbWl332KNrJJkxRIKj3NYMMTASmj3XtarzMXOEQYHsrggVeUZCbDEaadFOuI1IIXaI6wVCk_Y1hBqZ8h_PIaa8hWrMW"/>
+<button class="absolute top-1 right-1 bg-error text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Digital Signature -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md md:p-lg">
+<h3 class="text-title-sm font-title-sm text-primary uppercase mb-md">Firma Digital del Conductor</h3>
+<div class="bg-white border border-outline-variant h-40 relative flex items-center justify-center overflow-hidden">
+<span class="absolute bottom-4 left-4 right-4 border-t border-outline pointer-events-none opacity-40"></span>
+<p class="text-label-caps font-label-caps text-outline-variant">Firme aquí</p>
+<!-- In a real app, a canvas element would go here -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-6xl text-primary/10 select-none">draw</span>
+</div>
+</div>
+<div class="mt-md flex justify-between items-center">
+<div>
+<p class="text-body-sm font-bold text-primary">Marcos J. Rodríguez</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Licencia: #A-7788992</p>
+</div>
+<button class="text-secondary font-bold text-label-caps uppercase border border-secondary px-3 py-1 hover:bg-secondary/10 transition-colors" type="button">Limpiar</button>
+</div>
+</section>
+<!-- Submit Action -->
+<button class="w-full bg-secondary text-on-primary font-bold py-4 text-headline-md shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-md" type="submit">
+<span class="material-symbols-outlined">send</span>
+                    FINALIZAR INSPECCIÓN
+                </button>
+</div>
+</form>
+</main>
+<!-- Success Message Container (Hidden by default) -->
+<div class="fixed bottom-lg right-lg max-w-sm w-full bg-on-tertiary-container text-white p-lg shadow-xl translate-y-[200%] transition-transform duration-500 hidden">
+<div class="flex items-start gap-md">
+<span class="material-symbols-outlined">check_circle</span>
+<div>
+<h4 class="font-bold">Inspección Registrada</h4>
+<p class="text-body-sm">El vehículo B-4521-TX ha sido validado para la ruta actual.</p>
+</div>
+</div>
+</div>
+</body></html>

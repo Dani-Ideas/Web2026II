@@ -13,24 +13,42 @@ exports.index = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const [vehicles] = await db.query("SELECT id, plate, brand, model FROM vehicles WHERE status = 'activo'");
+    const [vehicles] = await db.query("SELECT id, plate, brand, model, type FROM vehicles WHERE status = 'activo'");
     res.render('inspections/form', { title: 'Nueva Inspección', vehicles });
   } catch (err) {
     next(err);
   }
 };
 
+function ratingToStatus(r) {
+  const n = parseInt(r, 10);
+  if (n >= 4) return 'pass';
+  if (n === 3) return 'caution';
+  return 'fail';
+}
+
 exports.store = async (req, res, next) => {
   try {
-    const { vehicle_id, driver_name, engine, lights, tires, safety, notes, signature } = req.body;
+    const { vehicle_id, driver_name,
+            engine_rating, lights_rating, tires_rating, safety_rating,
+            notes, signature, damage_map } = req.body;
+
+    const engine = ratingToStatus(engine_rating);
+    const lights = ratingToStatus(lights_rating);
+    const tires  = ratingToStatus(tires_rating);
+    const safety = ratingToStatus(safety_rating);
+    const result = [engine, lights, tires, safety].every(s => s === 'pass') ? 'pass' : 'fail';
     const photos = req.files ? req.files.map(f => f.filename).join(',') : '';
 
-    const result = req.body.engine === 'pass' && req.body.lights === 'pass' &&
-      req.body.tires === 'pass' && req.body.safety === 'pass' ? 'pass' : 'fail';
-
     await db.query(
-      'INSERT INTO inspections (vehicle_id, driver_name, engine, lights, tires, safety, result, notes, photos, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [vehicle_id, driver_name, engine, lights, tires, safety, result, notes, photos, signature]
+      `INSERT INTO inspections
+        (vehicle_id, driver_name, engine, lights, tires, safety, result,
+         engine_rating, lights_rating, tires_rating, safety_rating,
+         notes, photos, damage_map, signature)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      [vehicle_id, driver_name, engine, lights, tires, safety, result,
+       engine_rating || null, lights_rating || null, tires_rating || null, safety_rating || null,
+       notes, photos, damage_map || null, signature]
     );
     res.redirect('/inspecciones');
   } catch (err) {

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FleetOps Command - Historial de Mantenimiento</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#d6e4f9",
+                        "on-tertiary-container": "#3aa186",
+                        "primary": "#041627",
+                        "surface-container-low": "#eef4ff",
+                        "surface-container-high": "#dce9fe",
+                        "secondary-fixed": "#ffdcc3",
+                        "inverse-surface": "#243141",
+                        "on-surface-variant": "#44474c",
+                        "tertiary": "#001912",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#e5eeff",
+                        "on-primary-fixed-variant": "#38485a",
+                        "on-secondary-fixed": "#2f1500",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#1a2b3c",
+                        "primary-fixed-dim": "#b7c8de",
+                        "on-secondary-container": "#603100",
+                        "tertiary-fixed-dim": "#76d8bb",
+                        "on-primary-container": "#8192a7",
+                        "surface-tint": "#4f6073",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#6e3900",
+                        "surface": "#f8f9ff",
+                        "on-surface": "#0f1c2b",
+                        "primary-fixed": "#d2e4fb",
+                        "secondary-container": "#fd8b00",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#92f5d6",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#0f1c2b",
+                        "secondary": "#904d00",
+                        "surface-dim": "#cddbf0",
+                        "outline-variant": "#c4c6cd",
+                        "background": "#f8f9ff",
+                        "inverse-primary": "#b7c8de",
+                        "on-primary-fixed": "#0b1d2d",
+                        "surface-container-highest": "#d6e4f9",
+                        "on-tertiary-fixed-variant": "#005140",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-container": "#003025",
+                        "on-tertiary-fixed": "#002018",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#ffb77d",
+                        "outline": "#74777d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "sm": "8px",
+                        "xl": "40px",
+                        "margin-page": "32px",
+                        "xs": "4px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "data-tabular": ["Inter"],
+                        "title-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-base": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "data-tabular": ["14px", {"lineHeight": "1", "fontWeight": "500"}],
+                        "title-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-lg": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-primary dark:bg-primary flex flex-col h-full py-md gap-sm border-r border-outline dark:border-on-primary-fixed-variant z-50">
+<div class="px-md mb-lg">
+<h2 class="text-title-sm font-title-sm text-on-primary uppercase tracking-widest">Global Logistics</h2>
+<p class="text-on-primary-container text-[10px] opacity-70">Terminal A-12</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-4 py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="text-label-caps font-label-caps uppercase">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">directions_car</span>
+<span class="text-label-caps font-label-caps uppercase">Fleet</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3">fact_check</span>
+<span class="text-label-caps font-label-caps uppercase">Inspections</span>
+</a>
+<a class="flex items-center px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-lg my-1 mx-2 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3">build</span>
+<span class="text-label-caps font-label-caps uppercase">Maintenance</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-on-primary-fixed-variant/20 pt-md">
+<a class="flex items-center px-4 py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2" href="#">
+<span class="material-symbols-outlined mr-3">help</span>
+<span class="text-label-caps font-label-caps uppercase">Support</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-primary-container hover:text-on-primary hover:bg-on-primary-fixed-variant/20 rounded-lg my-1 mx-2" href="#">
+<span class="material-symbols-outlined mr-3">logout</span>
+<span class="text-label-caps font-label-caps uppercase">Sign Out</span>
+</a>
+</div>
+</aside>
+<div class="ml-64 flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-lg h-16 z-40 bg-surface-container-lowest dark:bg-primary-container border-b border-outline-variant dark:border-outline fixed top-0 left-64 right-0 w-[calc(100%-16rem)]">
+<div class="flex items-center gap-lg">
+<h1 class="text-headline-md font-headline-md text-primary dark:text-primary-fixed-dim tracking-tight font-black">FleetOps Command</h1>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg text-body-sm focus:ring-2 focus:ring-secondary focus:border-transparent outline-none w-64" placeholder="Buscar vehículo o reporte..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-2"></div>
+<button class="bg-secondary text-on-primary px-lg py-2 rounded font-bold text-body-sm active:opacity-80 transition-all uppercase tracking-wider">
+                    Dispatch
+                </button>
+<img alt="Fleet Manager Profile" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAASTIKdcE42sEmswrlvm0JUi0kcAmhhvLJ0X6LZhcOyr3p0oAZwInJViIc5QayTiA9XIQyrU8Ey-jiTbq-gbCvaB_BKBdBIdcHB2WwN9Dn3kghjC1pbuICguPQmDXa0miHEQm8YyQGbMI2boWyHGunMAKcoS9FY6-yktS2BqGf7QuaOE0xNpGxm_m6cmeIlb3Q8hKG3XsGYXQxjL83ljdgrVPpRZVrGWsbFQDtiVZbLDyaoq_4iKJelXmhj_3bbJk25DF1UoLrx_EL"/>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="mt-16 p-lg flex-1">
+<div class="max-w-[1600px] mx-auto space-y-lg">
+<!-- KPI Section -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<div class="bg-surface-container-lowest border border-outline-variant p-lg">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">Gasto Total (Mes)</span>
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<p class="text-display-lg font-display-lg">$42,850.00</p>
+<p class="text-body-sm text-on-tertiary-container font-semibold mt-xs flex items-center">
+<span class="material-symbols-outlined text-[16px] mr-1">trending_down</span> -12% vs mes anterior
+                        </p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-lg">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">Mantenimientos Próximos</span>
+<span class="material-symbols-outlined text-secondary">event</span>
+</div>
+<p class="text-display-lg font-display-lg">18</p>
+<p class="text-body-sm text-on-surface-variant mt-xs">Siguientes 7 días</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-lg">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">Vehículos en Taller</span>
+<span class="material-symbols-outlined text-error">hail</span>
+</div>
+<p class="text-display-lg font-display-lg">4</p>
+<p class="text-body-sm text-error font-semibold mt-xs">2 Críticos</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-lg">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">Salud de Flota</span>
+<span class="material-symbols-outlined text-on-tertiary-container">verified</span>
+</div>
+<p class="text-display-lg font-display-lg">94%</p>
+<div class="w-full bg-surface-container-high h-2 mt-sm">
+<div class="bg-on-tertiary-container h-full w-[94%]"></div>
+</div>
+</div>
+</div>
+<!-- Main Layout Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
+<!-- Left Column: History Table -->
+<div class="lg:col-span-8 space-y-md">
+<div class="flex justify-between items-center mb-sm">
+<h2 class="text-headline-md font-headline-md text-primary font-black uppercase tracking-tight">Historial de Reparaciones</h2>
+<button class="border border-primary text-primary px-md py-1.5 font-bold text-label-caps uppercase hover:bg-surface-container transition-colors">
+                                Exportar Reporte
+                            </button>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-primary text-on-primary">
+<tr>
+<th class="px-md py-4 text-label-caps font-label-caps uppercase">Fecha</th>
+<th class="px-md py-4 text-label-caps font-label-caps uppercase">Vehículo</th>
+<th class="px-md py-4 text-label-caps font-label-caps uppercase">Servicio / Taller</th>
+<th class="px-md py-4 text-label-caps font-label-caps uppercase">Costo</th>
+<th class="px-md py-4 text-label-caps font-label-caps uppercase">Estado</th>
+<th class="px-md py-4 text-label-caps font-label-caps uppercase text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="text-body-sm divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-4 font-data-tabular">24 Oct 2023</td>
+<td class="px-md py-4">
+<div class="font-bold text-primary">TRK-204</div>
+<div class="text-[11px] text-on-surface-variant">Freightliner Cascadia</div>
+</td>
+<td class="px-md py-4">
+<div class="font-semibold">Revisión de Frenos y ABS</div>
+<div class="text-[11px] text-on-surface-variant italic">EuroTaller Central</div>
+</td>
+<td class="px-md py-4 font-data-tabular">$1,240.00</td>
+<td class="px-md py-4">
+<span class="inline-block px-2 py-1 bg-on-tertiary-container/10 text-on-tertiary-container font-bold text-[10px] uppercase rounded-sm border border-on-tertiary-container/20">Completado</span>
+</td>
+<td class="px-md py-4 text-right">
+<button class="text-primary hover:text-secondary"><span class="material-symbols-outlined">receipt_long</span></button>
+</td>
+</tr>
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low transition-colors">
+<td class="px-md py-4 font-data-tabular">22 Oct 2023</td>
+<td class="px-md py-4">
+<div class="font-bold text-primary">VAN-089</div>
+<div class="text-[11px] text-on-surface-variant">Ford Transit 2022</div>
+</td>
+<td class="px-md py-4">
+<div class="font-semibold">Cambio de Aceite &amp; Filtros</div>
+<div class="text-[11px] text-on-surface-variant italic">QuickFix Express</div>
+</td>
+<td class="px-md py-4 font-data-tabular">$345.50</td>
+<td class="px-md py-4">
+<span class="inline-block px-2 py-1 bg-on-tertiary-container/10 text-on-tertiary-container font-bold text-[10px] uppercase rounded-sm border border-on-tertiary-container/20">Completado</span>
+</td>
+<td class="px-md py-4 text-right">
+<button class="text-primary hover:text-secondary"><span class="material-symbols-outlined">receipt_long</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-4 font-data-tabular">20 Oct 2023</td>
+<td class="px-md py-4">
+<div class="font-bold text-primary">TRK-102</div>
+<div class="text-[11px] text-on-surface-variant">Kenworth T680</div>
+</td>
+<td class="px-md py-4">
+<div class="font-semibold text-secondary">Reparación Transmisión</div>
+<div class="text-[11px] text-on-surface-variant italic">Taller Diesel Hnos.</div>
+</td>
+<td class="px-md py-4 font-data-tabular">$4,800.00</td>
+<td class="px-md py-4">
+<span class="inline-block px-2 py-1 bg-secondary text-on-primary font-bold text-[10px] uppercase rounded-sm">En Proceso</span>
+</td>
+<td class="px-md py-4 text-right">
+<button class="text-primary hover:text-secondary"><span class="material-symbols-outlined">visibility</span></button>
+</td>
+</tr>
+<tr class="bg-surface-container-low/30 hover:bg-surface-container-low transition-colors">
+<td class="px-md py-4 font-data-tabular">18 Oct 2023</td>
+<td class="px-md py-4">
+<div class="font-bold text-primary">PKP-012</div>
+<div class="text-[11px] text-on-surface-variant">Toyota Hilux</div>
+</td>
+<td class="px-md py-4">
+<div class="font-semibold">Alineación y Balanceo</div>
+<div class="text-[11px] text-on-surface-variant italic">Neumáticos Pro</div>
+</td>
+<td class="px-md py-4 font-data-tabular">$180.00</td>
+<td class="px-md py-4">
+<span class="inline-block px-2 py-1 bg-on-tertiary-container/10 text-on-tertiary-container font-bold text-[10px] uppercase rounded-sm border border-on-tertiary-container/20">Completado</span>
+</td>
+<td class="px-md py-4 text-right">
+<button class="text-primary hover:text-secondary"><span class="material-symbols-outlined">receipt_long</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-md py-4 font-data-tabular">15 Oct 2023</td>
+<td class="px-md py-4">
+<div class="font-bold text-primary">TRK-205</div>
+<div class="text-[11px] text-on-surface-variant">Freightliner Cascadia</div>
+</td>
+<td class="px-md py-4">
+<div class="font-semibold text-error">Fuga de Refrigerante</div>
+<div class="text-[11px] text-on-surface-variant italic">EuroTaller Central</div>
+</td>
+<td class="px-md py-4 font-data-tabular">$950.00</td>
+<td class="px-md py-4">
+<span class="inline-block px-2 py-1 bg-error text-on-primary font-bold text-[10px] uppercase rounded-sm">Urgente</span>
+</td>
+<td class="px-md py-4 text-right">
+<button class="text-primary hover:text-secondary"><span class="material-symbols-outlined">warning</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Column: Preventive Calendar & Actions -->
+<div class="lg:col-span-4 space-y-lg">
+<!-- Quick Action Card -->
+<div class="bg-primary text-on-primary p-lg border border-outline shadow-xl relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="text-title-sm font-title-sm uppercase tracking-widest mb-md">Nueva Orden</h3>
+<p class="text-body-sm opacity-80 mb-lg">Registre un nuevo servicio de mantenimiento preventivo o correctivo de forma inmediata.</p>
+<button class="w-full bg-secondary text-white py-3 font-bold uppercase tracking-widest text-label-caps hover:scale-[1.02] active:scale-95 transition-all">
+                                    Registrar Servicio
+                                </button>
+</div>
+<div class="absolute -bottom-4 -right-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" style="font-variation-settings: 'FILL' 1;">build</span>
+</div>
+</div>
+<!-- Calendar Preview -->
+<div class="bg-surface-container-lowest border border-outline-variant">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="text-label-caps font-label-caps uppercase text-primary">Calendario Preventivo</h3>
+<div class="flex gap-1">
+<button class="p-1 hover:bg-surface-container-high"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+<button class="p-1 hover:bg-surface-container-high"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+</div>
+</div>
+<div class="p-md">
+<div class="text-center mb-md">
+<span class="font-bold text-title-sm">Noviembre 2023</span>
+</div>
+<div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-outline mb-2">
+<span>DO</span><span>LU</span><span>MA</span><span>MI</span><span>JU</span><span>VI</span><span>SA</span>
+</div>
+<div class="grid grid-cols-7 gap-1">
+<!-- Simple calendar mock -->
+<div class="h-8 flex items-center justify-center text-outline opacity-40 text-xs">29</div>
+<div class="h-8 flex items-center justify-center text-outline opacity-40 text-xs">30</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">1</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">2</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer font-bold bg-secondary/10 text-secondary border border-secondary/20">3</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">4</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">5</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">6</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer font-bold bg-on-tertiary-container/10 text-on-tertiary-container border border-on-tertiary-container/20">7</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">8</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">9</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">10</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">11</div>
+<div class="h-8 flex items-center justify-center text-xs hover:bg-surface-container cursor-pointer">12</div>
+</div>
+<div class="mt-lg space-y-md">
+<h4 class="text-[11px] font-bold uppercase text-outline tracking-wider border-b border-outline-variant pb-1">Eventos del Día</h4>
+<div class="flex gap-md">
+<div class="w-1 bg-secondary"></div>
+<div>
+<p class="font-bold text-body-sm">Mantenimiento de 50k KM</p>
+<p class="text-[11px] text-on-surface-variant">TRK-204 • 09:00 AM</p>
+</div>
+</div>
+<div class="flex gap-md">
+<div class="w-1 bg-on-tertiary-container"></div>
+<div>
+<p class="font-bold text-body-sm">Inspección Semestral</p>
+<p class="text-[11px] text-on-surface-variant">VAN-089 • 14:30 PM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Workshop Quality Card -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md">
+<h3 class="text-label-caps font-label-caps uppercase text-primary mb-md">Talleres Preferidos</h3>
+<div class="space-y-sm">
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low cursor-pointer">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[20px]">handyman</span>
+</div>
+<div>
+<p class="text-body-sm font-bold">EuroTaller Central</p>
+<p class="text-[10px] text-on-surface-variant">Especialidad: Motor/Frenos</p>
+</div>
+</div>
+<span class="text-on-tertiary-container text-[12px] font-bold flex items-center">
+                                        4.8 <span class="material-symbols-outlined text-[14px] ml-0.5" data-weight="fill">star</span>
+</span>
+</div>
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low cursor-pointer">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[20px]">tire_repair</span>
+</div>
+<div>
+<p class="text-body-sm font-bold">Neumáticos Pro</p>
+<p class="text-[10px] text-on-surface-variant">Especialidad: Suspensión</p>
+</div>
+</div>
+<span class="text-on-tertiary-container text-[12px] font-bold flex items-center">
+                                        4.5 <span class="material-symbols-outlined text-[14px] ml-0.5" data-weight="fill">star</span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Visual Decorative Image Section for industrial feel -->
+<div class="fixed bottom-0 right-0 w-full md:w-1/3 h-1 pointer-events-none opacity-20">
+<div class="w-full h-full bg-gradient-to-l from-secondary to-transparent"></div>
+</div>
+</body></html>
