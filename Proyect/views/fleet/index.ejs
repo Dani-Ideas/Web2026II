@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'fleet' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content">
+
+      <div class="toolbar">
+        <form class="toolbar__search" method="GET" action="/flota">
+          <input type="text" name="search" placeholder="Buscar placa, marca o modelo..." value="<%= search || '' %>" class="input" />
+          <select name="status" class="input input--select">
+            <option value="">Todos los estados</option>
+            <option value="activo"        <%= status === 'activo'        ? 'selected' : '' %>>Activo</option>
+            <option value="inactivo"      <%= status === 'inactivo'      ? 'selected' : '' %>>Inactivo</option>
+            <option value="mantenimiento" <%= status === 'mantenimiento' ? 'selected' : '' %>>En Mantenimiento</option>
+          </select>
+          <button type="submit" class="btn btn--ghost">Filtrar</button>
+        </form>
+        <a href="/flota/nuevo" class="btn btn--action">+ Nuevo Vehículo</a>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Marca / Modelo</th>
+            <th>Año</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Seguro Vence</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (vehicles.length === 0) { %>
+            <tr><td colspan="7" class="table__empty">No se encontraron vehículos</td></tr>
+          <% } else { %>
+            <% vehicles.forEach(v => { %>
+              <tr>
+                <td class="table__mono"><%= v.plate %></td>
+                <td><%= v.brand %> <%= v.model %></td>
+                <td class="table__mono"><%= v.year %></td>
+                <td><%= v.type %></td>
+                <td><span class="badge badge--<%= v.status %>"><%= v.status %></span></td>
+                <td class="table__mono"><%= v.insurance_expiry ? new Date(v.insurance_expiry).toLocaleDateString('es-ES') : '—' %></td>
+                <td class="table__actions">
+                  <a href="/flota/<%= v.id %>/editar" class="btn btn--ghost btn--sm">Editar</a>
+                  <form method="POST" action="/flota/<%= v.id %>/eliminar" style="display:inline"
+                    onsubmit="return confirm('¿Eliminar este vehículo?')">
+                    <button type="submit" class="btn btn--danger btn--sm">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+
+    </div>
+  </main>
+</body>
+</html>

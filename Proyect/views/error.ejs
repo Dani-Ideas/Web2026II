@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('partials/head') %></head>
+<body class="layout">
+  <%- include('partials/sidebar', { currentPage: '' }) %>
+  <main class="main">
+    <%- include('partials/topbar') %>
+    <div class="content">
+      <div class="error-state">
+        <h2 class="error-state__code"><%= title %></h2>
+        <p class="error-state__message"><%= message %></p>
+        <a href="/" class="btn btn--primary">Volver al Dashboard</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

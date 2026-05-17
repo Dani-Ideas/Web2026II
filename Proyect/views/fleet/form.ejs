@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'fleet' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content content--narrow">
+
+      <form method="POST" action="<%= vehicle ? '/flota/' + vehicle.id : '/flota' %>" class="form">
+
+        <!-- ── Datos del vehículo ────────────────────────────────── -->
+        <div class="form__section">
+          <h3 class="form__section-title">Información del Vehículo</h3>
+          <div class="form__grid">
+            <div class="form__group">
+              <label class="form__label">Placa</label>
+              <input type="text" name="plate" class="input" required value="<%= vehicle ? vehicle.plate : '' %>" />
+            </div>
+            <div class="form__group">
+              <label class="form__label">Marca</label>
+              <input type="text" name="brand" class="input" required value="<%= vehicle ? vehicle.brand : '' %>" />
+            </div>
+            <div class="form__group">
+              <label class="form__label">Modelo</label>
+              <input type="text" name="model" class="input" required value="<%= vehicle ? vehicle.model : '' %>" />
+            </div>
+            <div class="form__group">
+              <label class="form__label">Año</label>
+              <input type="number" name="year" class="input" min="1990" max="2030" value="<%= vehicle ? vehicle.year : '' %>" />
+            </div>
+            <div class="form__group">
+              <label class="form__label">Tipo</label>
+              <select name="type" class="input input--select">
+                <option value="camión"      <%= vehicle && vehicle.type === 'camión'      ? 'selected' : '' %>>Camión</option>
+                <option value="furgoneta"   <%= vehicle && vehicle.type === 'furgoneta'   ? 'selected' : '' %>>Furgoneta</option>
+                <option value="automóvil"   <%= vehicle && vehicle.type === 'automóvil'   ? 'selected' : '' %>>Automóvil</option>
+                <option value="motocicleta" <%= vehicle && vehicle.type === 'motocicleta' ? 'selected' : '' %>>Motocicleta</option>
+              </select>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Estado</label>
+              <select name="status" class="input input--select">
+                <option value="activo"        <%= !vehicle || vehicle.status === 'activo'        ? 'selected' : '' %>>Activo</option>
+                <option value="inactivo"      <%= vehicle && vehicle.status === 'inactivo'       ? 'selected' : '' %>>Inactivo</option>
+                <option value="mantenimiento" <%= vehicle && vehicle.status === 'mantenimiento'  ? 'selected' : '' %>>En Mantenimiento</option>
+              </select>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Capacidad de Combustible (L)</label>
+              <input type="number" name="fuel_capacity" class="input" value="<%= vehicle ? vehicle.fuel_capacity : '' %>" />
+            </div>
+            <div class="form__group">
+              <label class="form__label">Vencimiento de Seguro</label>
+              <input type="date" name="insurance_expiry" class="input"
+                value="<%= vehicle && vehicle.insurance_expiry ? vehicle.insurance_expiry.toISOString().split('T')[0] : '' %>" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Programación de mantenimiento periódico ───────────── -->
+        <div class="form__section">
+          <h3 class="form__section-title">
+            Programación de Mantenimiento Periódico
+            <span class="form__optional">opcional</span>
+          </h3>
+
+          <!-- Criterio: mutually exclusive radios -->
+          <div class="form__group">
+            <label class="form__label">Criterio de activación</label>
+            <div class="trigger-group">
+              <label class="trigger-opt">
+                <input type="radio" name="trigger_type" value="distance"
+                  onchange="onTriggerChange(this)"
+                  <%= schedule && schedule.trigger_type === 'distance' ? 'checked' : '' %> />
+                <span class="trigger-opt__label">Distancia (km)</span>
+              </label>
+              <label class="trigger-opt">
+                <input type="radio" name="trigger_type" value="time"
+                  onchange="onTriggerChange(this)"
+                  <%= schedule && schedule.trigger_type === 'time' ? 'checked' : '' %> />
+                <span class="trigger-opt__label">Tiempo (días)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form__group input-unit-wrap"
+               id="triggerValueGroup"
+               style="display:<%= schedule ? 'flex' : 'none' %>">
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+              <label class="form__label" id="triggerValueLabel">
+                <%= schedule && schedule.trigger_type === 'time' ? 'Cada cuántos días' : 'Cada cuántos km' %>
+              </label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input type="number" name="trigger_value" id="triggerValue" class="input"
+                  min="1" value="<%= schedule ? schedule.trigger_value : '' %>" />
+                <span class="input-unit" id="triggerUnit">
+                  <%= schedule && schedule.trigger_type === 'time' ? 'días' : 'km' %>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Program cards -->
+          <div class="form__group">
+            <label class="form__label">Secuencia de mantenimientos</label>
+            <div class="prog-grid">
+              <% Object.entries(PROGRAMS).forEach(([pid, steps]) => { %>
+                <label class="prog-card">
+                  <input type="radio" name="program_id" value="<%= pid %>" class="prog-card__radio"
+                    <%= schedule && schedule.program_id == pid ? 'checked' : '' %> />
+                  <div class="prog-card__inner">
+                    <span class="prog-card__name">Programación <%= pid %></span>
+                    <div class="prog-card__seq">
+                      <% steps.forEach((step, i) => {
+                           const isCurrent = schedule && schedule.program_id == pid &&
+                                             (i === schedule.current_step % steps.length);
+                      %>
+                        <div class="prog-step
+                          prog-step--<%= step === 'Ajuste' ? 'ajuste' : step === 'Medio Ajuste' ? 'medio' : 'afin' %>
+                          <%= isCurrent ? 'prog-step--current' : '' %>">
+                          <span class="prog-step__num"><%= i + 1 %></span>
+                          <span class="prog-step__name"><%= step %></span>
+                        </div>
+                      <% }) %>
+                    </div>
+                  </div>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Progress + complete button (edit mode only, when schedule exists) -->
+          <% if (vehicle && schedule) {
+               const prog  = PROGRAMS[schedule.program_id] || [];
+               const step  = schedule.current_step % (prog.length || 1);
+               const next  = prog[step] || '—';
+          %>
+          <div class="sched-progress">
+            <span class="form__label">Progreso actual en la secuencia</span>
+            <div class="seq-dots" style="margin-top:6px;">
+              <% prog.forEach((st, i) => { %>
+                <span class="seq-dot seq-dot--<%= i < step ? 'done' : i === step ? 'next' : 'pending' %>"
+                      title="<%= (i+1) + '. ' + st %>"></span>
+              <% }) %>
+            </div>
+            <span class="seq-label"><%= step + 1 %> / <%= prog.length %> — Próximo: <strong><%= next %></strong></span>
+            <form method="POST" action="/flota/horario/<%= schedule.id %>/avanzar" style="display:inline;margin-top:10px;">
+              <button type="submit" class="btn btn--action btn--sm"
+                onclick="return confirm('¿Marcar \\'<%= next %>\\' como completado y avanzar al siguiente paso?')">
+                Completar paso actual
+              </button>
+            </form>
+          </div>
+          <% } %>
+
+        </div>
+
+        <!-- ── Acciones ───────────────────────────────────────────── -->
+        <div class="form__actions">
+          <a href="/flota" class="btn btn--ghost">Cancelar</a>
+          <button type="submit" class="btn btn--primary">
+            <%= vehicle ? 'Guardar Cambios' : 'Crear Vehículo' %>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </main>
+
+  <script>
+    function onTriggerChange(radio) {
+      const group = document.getElementById('triggerValueGroup');
+      const label = document.getElementById('triggerValueLabel');
+      const unit  = document.getElementById('triggerUnit');
+      group.style.display = 'flex';
+      if (radio.value === 'distance') {
+        label.textContent = 'Cada cuántos km';
+        unit.textContent  = 'km';
+      } else {
+        label.textContent = 'Cada cuántos días';
+        unit.textContent  = 'días';
+      }
+    }
+  </script>
+</body>
+</html>

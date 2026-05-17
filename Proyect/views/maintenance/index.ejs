@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'maintenance' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content">
+
+      <div class="toolbar">
+        <span></span>
+        <a href="/mantenimiento/nuevo" class="btn btn--action">+ Nuevo Registro</a>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Vehículo</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Costo</th>
+            <th>Estado</th>
+            <th>Fecha Programada</th>
+            <th>Completado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (records.length === 0) { %>
+            <tr><td colspan="9" class="table__empty">Sin registros de mantenimiento</td></tr>
+          <% } else { %>
+            <% records.forEach(r => { %>
+              <tr>
+                <td class="table__mono"><%= r.plate %></td>
+                <td><%= r.brand %> <%= r.model %></td>
+                <td><%= r.type %></td>
+                <td><%= r.description %></td>
+                <td class="table__mono">$<%= Number(r.cost).toLocaleString('es-ES') %></td>
+                <td><span class="badge badge--<%= r.status %>"><%= r.status %></span></td>
+                <td class="table__mono"><%= r.scheduled_date ? new Date(r.scheduled_date).toLocaleDateString('es-ES') : '—' %></td>
+                <td class="table__mono"><%= r.completed_date ? new Date(r.completed_date).toLocaleDateString('es-ES') : '—' %></td>
+                <td class="table__actions">
+                  <a href="/mantenimiento/<%= r.id %>/editar" class="btn btn--ghost btn--sm">Editar</a>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+
+    </div>
+  </main>
+</body>
+</html>

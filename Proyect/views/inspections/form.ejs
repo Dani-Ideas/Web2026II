@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'inspections' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content content--narrow">
+
+      <form method="POST" action="/inspecciones" enctype="multipart/form-data" class="form">
+
+        <div class="form__section">
+          <h3 class="form__section-title">Información General</h3>
+          <div class="form__grid">
+            <div class="form__group">
+              <label class="form__label">Vehículo</label>
+              <select name="vehicle_id" class="input input--select" required>
+                <option value="">Seleccionar vehículo...</option>
+                <% vehicles.forEach(v => { %>
+                  <option value="<%= v.id %>"><%= v.plate %> — <%= v.brand %> <%= v.model %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form__group">
+              <label class="form__label">Nombre del Conductor</label>
+              <input type="text" name="driver_name" class="input" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="form__section">
+          <h3 class="form__section-title">Checklist de Inspección</h3>
+          <div class="checklist">
+            <% [['engine','Motor'],['lights','Luces'],['tires','Neumáticos'],['safety','Seguridad']].forEach(([field, label]) => { %>
+              <div class="checklist__item">
+                <span class="checklist__label"><%= label %></span>
+                <div class="checklist__options">
+                  <label class="checklist__radio">
+                    <input type="radio" name="<%= field %>" value="pass" required /> Aprobado
+                  </label>
+                  <label class="checklist__radio checklist__radio--caution">
+                    <input type="radio" name="<%= field %>" value="caution" /> Precaución
+                  </label>
+                  <label class="checklist__radio checklist__radio--fail">
+                    <input type="radio" name="<%= field %>" value="fail" /> Fallido
+                  </label>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="form__section">
+          <h3 class="form__section-title">Notas y Evidencia</h3>
+          <div class="form__group">
+            <label class="form__label">Observaciones</label>
+            <textarea name="notes" class="input input--textarea" rows="4"></textarea>
+          </div>
+          <div class="form__group">
+            <label class="form__label">Evidencia Fotográfica (máx. 5 imágenes)</label>
+            <input type="file" name="evidencia" multiple accept="image/*" class="input" />
+          </div>
+          <div class="form__group">
+            <label class="form__label">Firma Digital (base64)</label>
+            <canvas id="signatureCanvas" width="400" height="150" class="signature-canvas"></canvas>
+            <input type="hidden" name="signature" id="signatureData" />
+            <button type="button" class="btn btn--ghost btn--sm" onclick="clearSignature()">Limpiar firma</button>
+          </div>
+        </div>
+
+        <div class="form__actions">
+          <a href="/inspecciones" class="btn btn--ghost">Cancelar</a>
+          <button type="submit" class="btn btn--action">Registrar Inspección</button>
+        </div>
+      </form>
+
+    </div>
+  </main>
+  <script src="/js/signature.js"></script>
+</body>
+</html>

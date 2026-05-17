@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'inspections' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content content--narrow">
+
+      <div class="detail-card">
+        <div class="detail-card__header">
+          <div>
+            <p class="detail-card__sub"><%= inspection.plate %></p>
+            <h2 class="detail-card__title"><%= inspection.brand %> <%= inspection.model %></h2>
+          </div>
+          <span class="badge badge--<%= inspection.result %> badge--lg">
+            <%= inspection.result === 'pass' ? 'Aprobado' : 'Fallido' %>
+          </span>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-item__label">Conductor</span>
+            <span class="detail-item__value"><%= inspection.driver_name %></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-item__label">Fecha</span>
+            <span class="detail-item__value table__mono"><%= new Date(inspection.created_at).toLocaleString('es-ES') %></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-item__label">Motor</span>
+            <span class="badge badge--<%= inspection.engine %>"><%= inspection.engine %></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-item__label">Luces</span>
+            <span class="badge badge--<%= inspection.lights %>"><%= inspection.lights %></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-item__label">Neumáticos</span>
+            <span class="badge badge--<%= inspection.tires %>"><%= inspection.tires %></span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-item__label">Seguridad</span>
+            <span class="badge badge--<%= inspection.safety %>"><%= inspection.safety %></span>
+          </div>
+        </div>
+
+        <% if (inspection.notes) { %>
+          <div class="detail-notes">
+            <span class="detail-item__label">Observaciones</span>
+            <p><%= inspection.notes %></p>
+          </div>
+        <% } %>
+
+        <% if (inspection.photos) { %>
+          <div class="photo-grid">
+            <% inspection.photos.split(',').forEach(photo => { %>
+              <img src="/uploads/<%= photo %>" alt="Evidencia" class="photo-grid__img" />
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (inspection.signature) { %>
+          <div class="detail-item">
+            <span class="detail-item__label">Firma Digital</span>
+            <img src="<%= inspection.signature %>" alt="Firma" class="signature-preview" />
+          </div>
+        <% } %>
+      </div>
+
+      <div class="form__actions">
+        <a href="/inspecciones" class="btn btn--ghost">Volver</a>
+      </div>
+
+    </div>
+  </main>
+</body>
+</html>

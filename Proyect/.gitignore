@@ -1,0 +1,26 @@
+# Claude
+.claude/
+CLAUDE.md
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Uploads
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+ reuirements/*

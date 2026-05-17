@@ -1,0 +1,9 @@
+FleetOps Command. He diseñado una solución integral para la gestión y chequeo de vehículos de transporte, compuesta por las siguientes pantallas:
+
+Dashboard Operativo: Un panel de control con métricas en tiempo real sobre vehículos activos, mantenimientos y alertas críticas (como vencimiento de seguros o desviaciones de ruta).
+Gestión de Flota (CRUD): Una interfaz de inventario completa donde puedes visualizar, filtrar y gestionar cada unidad de la flota.
+Formulario de Inspección: Un checklist detallado que permite a los conductores reportar el estado del motor, luces, neumáticos y seguridad, incluyendo carga de evidencia fotográfica y firma digital.
+Registro de Mantenimiento: Un historial de reparaciones y un calendario preventivo para asegurar la longevidad de la flota.
+He utilizado un sistema de diseño profesional con una paleta de azul marino profundo para transmitir confianza y naranja de seguridad para las acciones principales.
+Tecnologuias a usar.
+Express, Node, Docker, Pug, Html5, CSS3, JS, EJS, MySQL. 

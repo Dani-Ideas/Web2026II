@@ -1,0 +1,20 @@
+<aside class="sidebar">
+  <div class="sidebar__logo">
+    <span class="sidebar__logo-icon">&#9671;</span>
+    <span class="sidebar__logo-text">FleetOps</span>
+  </div>
+  <nav class="sidebar__nav">
+    <a href="/" class="sidebar__link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'sidebar__link--active' : '' %>">
+      <span class="sidebar__icon">&#9632;</span> Dashboard
+    </a>
+    <a href="/flota" class="sidebar__link <%= typeof currentPage !== 'undefined' && currentPage === 'fleet' ? 'sidebar__link--active' : '' %>">
+      <span class="sidebar__icon">&#9673;</span> Flota
+    </a>
+    <a href="/inspecciones" class="sidebar__link <%= typeof currentPage !== 'undefined' && currentPage === 'inspections' ? 'sidebar__link--active' : '' %>">
+      <span class="sidebar__icon">&#10003;</span> Inspecciones
+    </a>
+    <a href="/mantenimiento" class="sidebar__link <%= typeof currentPage !== 'undefined' && currentPage === 'maintenance' ? 'sidebar__link--active' : '' %>">
+      <span class="sidebar__icon">&#9881;</span> Mantenimiento
+    </a>
+  </nav>
+</aside>

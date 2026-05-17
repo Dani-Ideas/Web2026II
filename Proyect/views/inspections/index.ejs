@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'inspections' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content">
+
+      <div class="toolbar">
+        <span></span>
+        <a href="/inspecciones/nueva" class="btn btn--action">+ Nueva Inspección</a>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Vehículo</th>
+            <th>Conductor</th>
+            <th>Motor</th>
+            <th>Luces</th>
+            <th>Neumáticos</th>
+            <th>Seguridad</th>
+            <th>Resultado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (inspections.length === 0) { %>
+            <tr><td colspan="10" class="table__empty">Sin inspecciones registradas</td></tr>
+          <% } else { %>
+            <% inspections.forEach(i => { %>
+              <tr>
+                <td class="table__mono"><%= i.plate %></td>
+                <td><%= i.brand %> <%= i.model %></td>
+                <td><%= i.driver_name %></td>
+                <td><span class="badge badge--<%= i.engine %>"><%= i.engine %></span></td>
+                <td><span class="badge badge--<%= i.lights %>"><%= i.lights %></span></td>
+                <td><span class="badge badge--<%= i.tires %>"><%= i.tires %></span></td>
+                <td><span class="badge badge--<%= i.safety %>"><%= i.safety %></span></td>
+                <td><span class="badge badge--<%= i.result %>"><%= i.result === 'pass' ? 'Aprobado' : 'Fallido' %></span></td>
+                <td class="table__mono"><%= new Date(i.created_at).toLocaleDateString('es-ES') %></td>
+                <td class="table__actions">
+                  <a href="/inspecciones/<%= i.id %>" class="btn btn--ghost btn--sm">Ver</a>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+
+    </div>
+  </main>
+</body>
+</html>

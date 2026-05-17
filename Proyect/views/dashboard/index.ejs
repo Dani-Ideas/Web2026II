@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><%- include('../partials/head') %></head>
+<body class="layout">
+  <%- include('../partials/sidebar', { currentPage: 'dashboard' }) %>
+  <main class="main">
+    <%- include('../partials/topbar') %>
+    <div class="content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-card__label">Vehículos Totales</span>
+          <span class="stat-card__value"><%= stats.total %></span>
+        </div>
+        <div class="stat-card stat-card--active">
+          <span class="stat-card__label">Activos</span>
+          <span class="stat-card__value"><%= stats.active %></span>
+        </div>
+        <div class="stat-card stat-card--warning">
+          <span class="stat-card__label">Mantenimientos Pendientes</span>
+          <span class="stat-card__value"><%= stats.pendingMaintenance %></span>
+        </div>
+      </div>
+
+      <section class="section">
+        <h2 class="section__title">Inspecciones Recientes</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Vehículo</th>
+              <th>Conductor</th>
+              <th>Resultado</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (recentInspections.length === 0) { %>
+              <tr><td colspan="5" class="table__empty">Sin inspecciones registradas</td></tr>
+            <% } else { %>
+              <% recentInspections.forEach(i => { %>
+                <tr>
+                  <td class="table__mono"><%= i.plate %></td>
+                  <td><%= i.brand %> <%= i.model %></td>
+                  <td><%= i.driver_name %></td>
+                  <td><span class="badge badge--<%= i.result %>"><%= i.result === 'pass' ? 'Aprobado' : 'Fallido' %></span></td>
+                  <td class="table__mono"><%= new Date(i.created_at).toLocaleDateString('es-ES') %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </main>
+</body>
+</html>
